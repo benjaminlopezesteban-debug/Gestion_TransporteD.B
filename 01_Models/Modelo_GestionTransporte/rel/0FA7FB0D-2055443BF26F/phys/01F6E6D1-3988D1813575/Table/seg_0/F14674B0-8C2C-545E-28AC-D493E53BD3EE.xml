@@ -1,0 +1,49 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableProxyOraclev20c class="oracle.dbtools.crest.model.design.storage.oracle.v20c.TableProxyOraclev20c" name="terminal" directorySegmentName="seg_0" id="F14674B0-8C2C-545E-28AC-D493E53BD3EE">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<logging>YES</logging>
+<partitionedRowMovement>DISABLE</partitionedRowMovement>
+<temporaryChanged>false</temporaryChanged>
+<accessDriverType>oracle_loader</accessDriverType>
+<rejectLimit></rejectLimit>
+<columnProxies itemClass="oracle.dbtools.crest.model.design.storage.oracle.v12c.ColumnProxyOraclev12c">
+<ColumnProxy name="nombre_terminal" id="12B5508D-D0F4-EBE3-70D9-7245B1BA11CC">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="id_terminal" id="63A6621B-BE0A-40A6-844E-8FE460D75202">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="direccion" id="6D01A575-B4A3-B6E6-259A-11953F46A303">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="ciudad" id="85C33E58-72F0-5FB3-3F30-0FA8E0E52137">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+</ColumnProxy>
+</columnProxies>
+<primaryKeys>
+<PrimaryKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.PKProxyOraclev10g" name="pk_terminal" id="ED9E35A0-B75F-4552-FC99-006D1845C7BD">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<indexSort>SORTED</indexSort>
+</PrimaryKey>
+</primaryKeys>
+<uniqueKeys>
+<UniqueKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.UniqueOraclev10g" name="uk_terminal_nombre" id="46B93BF0-0C77-CA37-01E9-A7CE5BABF05E">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<indexSort>SORTED</indexSort>
+</UniqueKey>
+</uniqueKeys>
+</TableProxyOraclev20c>

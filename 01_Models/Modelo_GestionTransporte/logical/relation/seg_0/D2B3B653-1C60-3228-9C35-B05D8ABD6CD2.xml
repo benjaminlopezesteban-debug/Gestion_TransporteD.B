@@ -1,0 +1,19 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Relation class="oracle.dbtools.crest.model.design.logical.Relation" name="VENTA_DETALLE" directorySegmentName="seg_0" id="D2B3B653-1C60-3228-9C35-B05D8ABD6CD2">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-25 00:53:56 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<engineerTo>
+<item key="0FA7FB0D-A261-7FA1-D859-2055443BF26F" value="true"/>
+</engineerTo>
+<sourcePk>B95B0344-12A4-E4D6-748D-C5F294555B16</sourcePk>
+<identifying>false</identifying>
+<optionalSource>false</optionalSource>
+<optionalTarget>false</optionalTarget>
+<sourceCardinality>1</sourceCardinality>
+<sourceEntity>618C326F-80DB-6C6D-6FC7-1893899D79CF</sourceEntity>
+<targetCardinalityString>*</targetCardinalityString>
+<targetEntity>68FC070C-C85A-9741-EB93-A64C434DA78B</targetEntity>
+<transferable>true</transferable>
+<deleteRule>NO ACTION</deleteRule>
+</Relation>

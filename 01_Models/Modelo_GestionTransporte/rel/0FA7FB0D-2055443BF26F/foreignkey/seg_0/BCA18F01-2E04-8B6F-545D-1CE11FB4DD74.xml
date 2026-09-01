@@ -1,0 +1,18 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<FKIndexAssociation class="oracle.dbtools.crest.model.design.relational.FKIndexAssociation" directorySegmentName="seg_0" id="BCA18F01-2E04-8B6F-545D-1CE11FB4DD74" containerWithKeyObject="12778B00-D61B-9A46-7A3F-92373E019A5E" localFKIndex="57EC5B6C-D991-BBFD-FD20-1BFED07F64DB" name="fk_vc_conductor">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>153DC62B-DFB9-0E08-1F3F-C06C83DA4AA9</importedID>
+<referredTableLongName>conductor</referredTableLongName>
+<deleteRule>NO ACTION</deleteRule>
+<referredTableID>33312B50-B9F5-F9B0-3522-961B4165A507</referredTableID>
+<keyObject>E607CD7C-3B6B-8EF2-CBBE-E22F036CF095</keyObject>
+<referredKeyID>E607CD7C-3B6B-8EF2-CBBE-E22F036CF095</referredKeyID>
+<mandatory>true</mandatory>
+<refColNames>id_conductor</refColNames>
+<transferable>true</transferable>
+<rely>false</rely>
+<columnDependencyConstraintGenerateInDDL>true</columnDependencyConstraintGenerateInDDL>
+</FKIndexAssociation>

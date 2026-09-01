@@ -1,0 +1,85 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableProxyOraclev20c class="oracle.dbtools.crest.model.design.storage.oracle.v20c.TableProxyOraclev20c" name="tarifa" directorySegmentName="seg_0" id="AC4D7AE9-3E57-D06E-CB95-A315524DE395">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<logging>YES</logging>
+<partitionedRowMovement>DISABLE</partitionedRowMovement>
+<temporaryChanged>false</temporaryChanged>
+<accessDriverType>oracle_loader</accessDriverType>
+<rejectLimit></rejectLimit>
+<columnProxies itemClass="oracle.dbtools.crest.model.design.storage.oracle.v12c.ColumnProxyOraclev12c">
+<ColumnProxy name="id_tarifa" id="45074ED9-8AF4-7B19-8363-EF684796BA40">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="vigencia_hasta" id="7276A48B-D665-40AB-AB39-179BDCA54690">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="vigencia_desde" id="77C0E3C3-0C92-86D8-FBC5-FEE652216A5C">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="precio" id="B2572C44-F698-7204-764C-A3D2F46C938F">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="id_tipo_asiento" id="D8B8607E-4BC8-72B9-211D-16444921BCED">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="id_ruta" id="EA7F4C9C-D2B4-1D20-2D39-5362393B8D15">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+</ColumnProxy>
+</columnProxies>
+<foreignKeys>
+<ForeignKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.FKProxyOraclev10g" name="fk_tarifa_tipo" id="103D0FAA-06F5-5335-24FB-CF12DC6FE7DE">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+</ForeignKey>
+<ForeignKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.FKProxyOraclev10g" name="fk_tarifa_ruta" id="AA532DEC-A3EE-147E-07D6-3729B38C5989">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+</ForeignKey>
+</foreignKeys>
+<primaryKeys>
+<PrimaryKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.PKProxyOraclev10g" name="pk_tarifa" id="D35CBC52-57F6-F354-C0D9-E0A94794EE64">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<indexSort>SORTED</indexSort>
+</PrimaryKey>
+</primaryKeys>
+<tableCheckConstraints itemClass="oracle.dbtools.crest.model.design.storage.oracle.TableCheckConstraintOracle">
+<TableCheckConstraint name="ck_tarifa_rango" id="4236961A-806B-9383-E612-8C2D68A9816D">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<nameChanged>true</nameChanged>
+</TableCheckConstraint>
+<TableCheckConstraint name="ck_tarifa_precio" id="55FE82A5-F403-0706-B045-776B437A72BF">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<nameChanged>true</nameChanged>
+</TableCheckConstraint>
+</tableCheckConstraints>
+<uniqueKeys>
+<UniqueKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.UniqueOraclev10g" name="uk_tarifa_vigencia" id="583FE378-4910-955E-2A1F-E179786508FF">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<indexSort>SORTED</indexSort>
+</UniqueKey>
+</uniqueKeys>
+</TableProxyOraclev20c>

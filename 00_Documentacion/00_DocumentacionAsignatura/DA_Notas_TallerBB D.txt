@@ -1,0 +1,80 @@
+Taller BB.D
+
+Modelado -> 10 entidades con las reglas de negocio 
+tambien se puede ir al datamodeler -> importar un archivo de ddl - permite la automatización 
+
+¿En que me equivoque al modelar los datos del proyecto? y ¿Que correcciones me dio la IA?
+
+
+
+DDL -> 10 tablas con constraints de negocios 
+
+Poblamiento -> 
+
+
+
+Elementos a considerar para la prueba de Taller de bb.dd. 
+
+
+**El cursor se utiliza cuando uno tiene que realizar modificaciones como una tabla de detalle. Donde esta centralizado todo. para mostrar a todos los alumnos de una sección que esten aprobado o desaprobado 
+
+**El recor va a servir para realizar consultas a clientes o elemtos de poco datos 
+
+**El array va servir para recorrer datos fijos. ej. run y notas de un alumno
+
+
+Debo de estimar: Cuantos records según mis tablas necesito diseñar; Cuantos cursores realizar también. 
+
+
+Evaluación. Record; Varray; Cursores con o sin parametro; Excepciones; Introducción a objetos de base de datos "recomendación". Con una estructura de Ing de software. Marco referencial, requerimientos, en que lo vamos hacer, como lo vamos hacer, porque lo haremos así. Con la parte del informe de requerimientos, con el modelado de los datos y definiciones con el Script del proyecto. 
+
+y una presentación corta. Máx 5 minutos, las preguntas se pueden extender más. 
+
+
+Trabajar Varray - Records - Cursores -
+
+Definicion de requerimientos - Modelados entre otros para la prox semana. 
+
+
+
+**En todos lados que este trabajando me tienen que preguntar ¿Porque estas usando este elemento o esta habilidad?
+
+
+Clase 27 de agosto 
+Sobre la evaluación parcial 1
+
+Evaluación practica, encargo, presentación en 1 sola entrega. La mayoria es de la presentación, 60 presentación, 30 encargo, 10 informe.
+
+Encargo informe 
+-Describir el contexto de negocio, en un informe de requerimientos. 
+-Identificar los datos que vamos a procesar y la información relevante que vamos a generar
+-Precisar los tipos de datos compuestos tanto en records como con Varray.
+-Demostrár el uso de cursores con o sin parametros. 
+-Evaluar la implementación de procedimiento almacenados para construir un proceso integral 
+
+Informe. Ocupar la plantilla general
+
+
+Que es una excepción es una situación que interrumpe el flujo normal de ejecución de un programa
+
+Ejecución normal -> Ocurre un error/inconsistencia -> Se maneja la excepción. 
+Va en conjunto con la estructura del bloque anonimo. 
+Revisar el conjunto de codigos de excepción. 
+
+Al crear Id es bueno tener secuencias para generar automaticamente las id. O con algun metodo de asignación, la idea es tener varias formas de evitar que se dupliquen. Pensar en formas optimas de trabajar el DML y otras cosas. 
+
+Puedes crear excepciones. RAISE -> para generar detalles de errores y poder ejecutarlos en las excepciones. También pueden incluir las reglas de negocio. 
+
+
+
+**Notas de Trabajo en BB.DD** 
+-- Primero, al ocupar base de datos en los motores, la cantidad de tablas y el acceso a esta se determina por cada usuario y los permisos o tablas que tenga permitido visualizar.
+Tenia una bb.dd cargada en localhost ocupando un motor de docker para versionar la BB.DD. Al crear distintas conexiones con el mismo usuario los esquemas se iban "sumando" Generando ruido innecesario. Eran dos las opciones sin necesidad de eliminar:
+
+1. Crear un esquema nuevo. En oracle un usuario es un esquema. Cada conexión distinta al mismo usuario ingresa al mismo esquema. 	
+
+2. Crear una partición nueva con aislamiento total. Una bb.dd nueva
+
+Limpiare el esquema actual para ahorra fricción 
+
+

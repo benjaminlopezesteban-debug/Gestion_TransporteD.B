@@ -1,0 +1,542 @@
+-- variable TYPE solo toma 1 registro de la variable tomando el mismo tipo de datos que la variable
+
+--Record es un tipo de dato compuesto que puede contener múltiples campos, cada uno con su propio tipo de datos. Similar a una fila en una tabla de base de datos, un record puede almacenar diferentes tipos de información en un solo objeto. Por ejemplo, un record podría contener un campo para el nombre (VARCHAR2), otro para la edad (NUMBER) y otro para la fecha de nacimiento (DATE). Esto permite agrupar datos relacionados en una sola estructura, facilitando su manejo y manipulación en procedimientos y funciones PL/SQL.
+
+--El array o arreglo permite almacenar múltiples valores del mismo tipo de datos en una sola variable. A diferencia de un record, que puede contener diferentes tipos de datos, un array está diseñado para contener elementos homogéneos. Por ejemplo, un array podría almacenar una lista de números enteros (NUMBER) o una lista de cadenas de texto (VARCHAR2). 
+--Los arrays son útiles cuando se necesita trabajar con colecciones de datos del mismo tipo, permitiendo iterar sobre ellos y realizar operaciones en conjunto
+--ej
+
+/* 1. CREACIÓN DE TABLAS */
+
+/* Tabla ALUMNOS */
+
+CREATE TABLE alumnos (
+    rut        VARCHAR2(12) PRIMARY KEY,
+    nombre     VARCHAR2(100) NOT NULL,
+    edad       NUMBER(3),
+    carrera    VARCHAR2(100),
+    promedio   NUMBER(3,1)
+);
+
+
+/* Tabla NOTAS_ALUMNOS */
+
+CREATE TABLE notas_alumnos (
+    id_nota      NUMBER PRIMARY KEY,
+    rut          VARCHAR2(12),
+    asignatura   VARCHAR2(100),
+    nota         NUMBER(3,1),
+
+    CONSTRAINT fk_notas_alumnos
+        FOREIGN KEY (rut)
+        REFERENCES alumnos(rut)
+);
+
+
+/* 2. INSERTAR ALUMNOS */
+
+INSERT INTO alumnos
+(rut, nombre, edad, carrera, promedio)
+VALUES
+('11111111-1', 'Juan Pérez', 22, 'Ingeniería Informática', 5.8);
+
+INSERT INTO alumnos
+(rut, nombre, edad, carrera, promedio)
+VALUES
+('22222222-2', 'María González', 21, 'Ingeniería Informática', 6.2);
+
+INSERT INTO alumnos
+(rut, nombre, edad, carrera, promedio)
+VALUES
+('33333333-3', 'Pedro Soto', 23, 'Ingeniería Civil', 5.1);
+
+INSERT INTO alumnos
+(rut, nombre, edad, carrera, promedio)
+VALUES
+('44444444-4', 'Ana Morales', 20, 'Analítica de Datos', 6.5);
+
+INSERT INTO alumnos
+(rut, nombre, edad, carrera, promedio)
+VALUES
+('55555555-5', 'Carlos Rojas', 24, 'Analítica de Datos', 4.9);
+
+
+/*  3. INSERTAR NOTAS */
+
+
+INSERT INTO notas_alumnos
+(id_nota, rut, asignatura, nota)
+VALUES
+(1, '11111111-1', 'Bases de Datos', 6.2);
+
+INSERT INTO notas_alumnos
+(id_nota, rut, asignatura, nota)
+VALUES
+(2, '11111111-1', 'Programación', 5.8);
+
+INSERT INTO notas_alumnos
+(id_nota, rut, asignatura, nota)
+VALUES
+(3, '11111111-1', 'Matemáticas', 5.5);
+
+INSERT INTO notas_alumnos
+(id_nota, rut, asignatura, nota)
+VALUES
+(4, '22222222-2', 'Bases de Datos', 6.5);
+
+INSERT INTO notas_alumnos
+(id_nota, rut, asignatura, nota)
+VALUES
+(5, '22222222-2', 'Programación', 6.2);
+
+INSERT INTO notas_alumnos
+(id_nota, rut, asignatura, nota)
+VALUES
+(6, '22222222-2', 'Matemáticas', 5.9);
+
+INSERT INTO notas_alumnos
+(id_nota, rut, asignatura, nota)
+VALUES
+(7, '33333333-3', 'Bases de Datos', 4.8);
+
+INSERT INTO notas_alumnos
+(id_nota, rut, asignatura, nota)
+VALUES
+(8, '33333333-3', 'Programación', 5.2);
+
+INSERT INTO notas_alumnos
+(id_nota, rut, asignatura, nota)
+VALUES
+(9, '44444444-4', 'Bases de Datos', 6.7);
+
+INSERT INTO notas_alumnos
+(id_nota, rut, asignatura, nota)
+VALUES
+(10, '44444444-4', 'Programación', 6.4);
+
+INSERT INTO notas_alumnos
+(id_nota, rut, asignatura, nota)
+VALUES
+(11, '55555555-5', 'Bases de Datos', 4.5);
+
+INSERT INTO notas_alumnos
+(id_nota, rut, asignatura, nota)
+VALUES
+(12, '55555555-5', 'Programación', 5.0);
+
+COMMIT;
+
+
+/* Consultar alumnos: */
+
+SELECT *
+FROM alumnos;
+
+/* Consultar notas: */
+
+SELECT *
+FROM notas_alumnos
+ORDER BY rut, id_nota;
+
+
+/*
+EJERCICIO 1 — RECORD BÁSICO
+
+Objetivo
+
+Crear un RECORD que permita almacenar la información de un alumno.
+
+Paso 1 — Crear el tipo RECORD
+*/
+DECLARE
+
+    TYPE t_alumno IS RECORD (
+        rut       VARCHAR2(12),
+        nombre    VARCHAR2(100),
+        edad      NUMBER,
+        carrera   VARCHAR2(100),
+        promedio  NUMBER(3,1)
+    );
+
+BEGIN
+
+END;
+/
+
+/*
+Aquí hemos creado un nuevo tipo denominado:
+
+t_alumno
+
+Este tipo contiene cinco campos.
+
+*/
+
+/*
+Paso 2 — Crear una variable
+
+Dentro del mismo bloque agregamos:
+*/
+
+DECLARE
+
+    TYPE t_alumno IS RECORD (
+        rut       VARCHAR2(12),
+        nombre    VARCHAR2(100),
+        edad      NUMBER,
+        carrera   VARCHAR2(100),
+        promedio  NUMBER(3,1)
+    );
+
+    v_alumno t_alumno;
+
+BEGIN
+
+END;
+/
+
+/*
+Tenemos ahora:
+
+t_alumno
+     |
+     +--- rut
+     +--- nombre
+     +--- edad
+     +--- carrera
+     +--- promedio
+Paso 3 — Asignar información
+*/
+
+DECLARE
+
+    TYPE t_alumno IS RECORD (
+        rut       VARCHAR2(12),
+        nombre    VARCHAR2(100),
+        edad      NUMBER,
+        carrera   VARCHAR2(100),
+        promedio  NUMBER(3,1)
+    );
+
+    v_alumno t_alumno;
+
+BEGIN
+
+    v_alumno.rut := '11111111-1';
+    v_alumno.nombre := 'Juan Pérez';
+    v_alumno.edad := 22;
+    v_alumno.carrera := 'Ingeniería Informática';
+    v_alumno.promedio := 5.8;
+
+END;
+/
+
+/*
+Paso 4 — Mostrar información
+
+Agregamos DBMS_OUTPUT:
+*/
+
+
+SET SERVEROUTPUT ON;
+
+--Bloque anonimo 
+
+DECLARE
+
+    TYPE t_alumno IS RECORD ( --Define la estructura del record t_alumno con los campos rut, nombre, edad, carrera y promedio
+        rut       VARCHAR2(12),
+        nombre    VARCHAR2(100),
+        edad      NUMBER,
+        carrera   VARCHAR2(100),
+        promedio  NUMBER(3,1)
+    );
+
+    v_alumno t_alumno; --Se asigna la estructura del record t_alumno a la variable v_alumno
+
+BEGIN
+
+    v_alumno.rut := '11111111-1'; --Se asigna mediante el método .nombredelvalor
+    v_alumno.nombre := 'Juan Pérez';
+    v_alumno.edad := 22;
+    v_alumno.carrera := 'Ingeniería Informática';
+    v_alumno.promedio := 5.8;
+
+    DBMS_OUTPUT.PUT_LINE('RUT: ' || v_alumno.rut);
+    DBMS_OUTPUT.PUT_LINE('Nombre: ' || v_alumno.nombre);
+    DBMS_OUTPUT.PUT_LINE('Edad: ' || v_alumno.edad);
+    DBMS_OUTPUT.PUT_LINE('Carrera: ' || v_alumno.carrera);
+    DBMS_OUTPUT.PUT_LINE('Promedio: ' || v_alumno.promedio);
+
+END;
+/
+
+
+/*
+EJERCICIO 2 — RECORD + SELECT INTO
+
+Ahora utilizaremos el RECORD para recibir directamente el resultado de una consulta.
+
+Objetivo
+
+Buscar un alumno en la tabla ALUMNOS y almacenar toda la fila dentro de un RECORD.
+
+Paso 1 — Crear el RECORD
+*/
+
+DECLARE
+
+    TYPE t_alumno IS RECORD (
+        rut       VARCHAR2(12),
+        nombre    VARCHAR2(100),
+        edad      NUMBER,
+        carrera   VARCHAR2(100),
+        promedio  NUMBER(3,1)
+    );
+
+    v_alumno t_alumno;
+
+BEGIN
+
+END;
+/
+
+
+/*
+Paso 2 — Obtener los datos
+
+Agregamos:
+
+SELECT rut,
+       nombre,
+       edad,
+       carrera,
+       promedio
+INTO v_alumno
+FROM alumnos
+WHERE rut = '22222222-2';
+*/
+
+
+/*
+Paso 3 — Mostrar los datos
+*/
+
+SET SERVEROUTPUT ON;
+
+DECLARE
+
+    TYPE t_alumno IS RECORD (
+        rut       VARCHAR2(12),
+        nombre    VARCHAR2(100),
+        edad      NUMBER,
+        carrera   VARCHAR2(100),
+        promedio  NUMBER(3,1)
+    );
+
+    v_alumno t_alumno;
+
+BEGIN
+
+    SELECT rut,
+           nombre,
+           edad,
+           carrera,
+           promedio
+    INTO v_alumno
+    FROM alumnos
+    WHERE rut = '22222222-2';
+
+    DBMS_OUTPUT.PUT_LINE('--------------------------');
+    DBMS_OUTPUT.PUT_LINE('DATOS DEL ALUMNO');
+    DBMS_OUTPUT.PUT_LINE('--------------------------');
+
+    DBMS_OUTPUT.PUT_LINE('RUT: ' || v_alumno.rut);
+    DBMS_OUTPUT.PUT_LINE('Nombre: ' || v_alumno.nombre);
+    DBMS_OUTPUT.PUT_LINE('Edad: ' || v_alumno.edad);
+    DBMS_OUTPUT.PUT_LINE('Carrera: ' || v_alumno.carrera);
+    DBMS_OUTPUT.PUT_LINE('Promedio: ' || v_alumno.promedio);
+
+END;
+/
+
+/*
+¿Qué aprendemos?
+
+Aquí aparece una de las aplicaciones más importantes de RECORD:
+
+TABLA
+  ↓
+SELECT
+  ↓
+RECORD
+  ↓
+procesamiento PL/SQL
+
+Conceptualmente:
+
+Una fila de ALUMNOS
+        ↓
+   v_alumno
+        ↓
+ ┌───────────────┐
+ │ rut           │
+ │ nombre        │
+ │ edad          │
+ │ carrera       │
+ │ promedio      │
+ └───────────────┘
+
+*/
+
+/*
+EJERCICIO 3 — VARRAY BÁSICO
+
+Ahora trabajaremos con una colección de notas.
+
+Objetivo
+
+Crear un VARRAY capaz de almacenar hasta cinco notas.
+
+Paso 1 — Crear el VARRAY
+*/
+
+DECLARE
+
+    TYPE t_notas IS VARRAY(5) OF NUMBER(3,1);
+
+BEGIN
+
+END;
+/
+
+/*
+La instrucción:
+
+VARRAY(5)
+
+significa que la colección puede contener como máximo cinco elementos.
+/*
+
+/*
+Paso 2 — Crear la variable
+*/
+
+DECLARE
+
+    TYPE t_notas IS VARRAY(5) OF NUMBER(3,1);
+
+    v_notas t_notas;
+
+BEGIN
+
+END;
+/
+
+/*
+Paso 3 — Asignar las notas
+*/
+
+DECLARE
+
+    TYPE t_notas IS VARRAY(5) OF NUMBER(3,1);
+
+    v_notas t_notas;
+
+BEGIN
+
+    v_notas := t_notas(
+        5.5,
+        6.2,
+        4.8,
+        6.0
+    );
+
+END;
+/
+
+/*
+Tenemos:
+
+VARRAY(5)
+
+┌─────┬─────┬─────┬─────┬─────┐
+│ 5.5 │ 6.2 │ 4.8 │ 6.0 │     │
+└─────┴─────┴─────┴─────┴─────┘
+   1     2     3     4     5
+*/
+
+
+/*
+Paso 4 — Recorrer el VARRAY
+*/
+
+SET SERVEROUTPUT ON;
+
+DECLARE
+
+    TYPE t_notas IS VARRAY(5) OF NUMBER(3,1);
+
+    v_notas t_notas;
+
+BEGIN
+
+    v_notas := t_notas(
+        5.5,
+        6.2,
+        4.8,
+        6.0
+    );
+
+    FOR i IN 1 .. v_notas.COUNT LOOP
+
+        DBMS_OUTPUT.PUT_LINE(
+            'Nota ' || i || ': ' || v_notas(i)
+        );
+
+    END LOOP;
+
+END;
+/
+
+/*
+EJERCICIO 4 — VARRAY + MÉTODOS DE COLECCIÓN
+
+Ahora utilizaremos los principales métodos de un VARRAY.
+*/
+
+SET SERVEROUTPUT ON;
+
+DECLARE
+
+    TYPE t_notas IS VARRAY(5) OF NUMBER(3,1);
+
+    v_notas t_notas;
+
+BEGIN
+
+    v_notas := t_notas(
+        5.5,
+        6.2,
+        4.8,
+        6.0
+    );
+
+    DBMS_OUTPUT.PUT_LINE(
+        'Cantidad: ' || v_notas.COUNT
+    );
+
+    DBMS_OUTPUT.PUT_LINE(
+        'Primera posición: ' || v_notas.FIRST
+    );
+
+    DBMS_OUTPUT.PUT_LINE(
+        'Última posición: ' || v_notas.LAST
+    );
+
+    DBMS_OUTPUT.PUT_LINE(
+        'Capacidad máxima: ' || v_notas.LIMIT
+    );
+
+END;
+/

@@ -1,0 +1,18 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<FKIndexAssociation class="oracle.dbtools.crest.model.design.relational.FKIndexAssociation" directorySegmentName="seg_0" id="0C17CA01-24F2-FB8A-44B8-AB805A2645D9" containerWithKeyObject="0FFB4E7E-D7A6-DCC3-3317-C053232E8716" localFKIndex="EB2BFD5C-814D-B58C-2FB9-5B8B0915BEB3" name="fk_pasaje_asiento">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>EBAB034E-47B7-96AD-7C8C-4AE816FDE329</importedID>
+<referredTableLongName>asiento</referredTableLongName>
+<deleteRule>NO ACTION</deleteRule>
+<referredTableID>B81F655A-1231-51C1-BCC5-C72C5FEA75FE</referredTableID>
+<keyObject>4993BE28-C1D8-C056-BA59-6ACB1517FC9B</keyObject>
+<referredKeyID>4993BE28-C1D8-C056-BA59-6ACB1517FC9B</referredKeyID>
+<mandatory>true</mandatory>
+<refColNames>id_bus,nro_asiento</refColNames>
+<transferable>true</transferable>
+<rely>false</rely>
+<columnDependencyConstraintGenerateInDDL>true</columnDependencyConstraintGenerateInDDL>
+</FKIndexAssociation>

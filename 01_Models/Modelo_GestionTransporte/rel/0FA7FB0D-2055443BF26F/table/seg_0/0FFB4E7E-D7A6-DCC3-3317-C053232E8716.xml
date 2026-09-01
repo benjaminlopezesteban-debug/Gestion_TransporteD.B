@@ -1,0 +1,264 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="0FFB4E7E-D7A6-DCC3-3317-C053232E8716" name="pasaje">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>6C1D0FDF-C38F-EDAD-452F-8AF63C464CA0</importedID>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="id_pasaje" id="507DD66F-9B8C-613A-F74A-1A751124CC59">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>9AC03503-8E66-9F0A-0181-6033B17A950A</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>417F7C7B-0C91-C918-D533-816335D77624</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="id_venta" id="4FF01A12-D66B-7B5C-28D8-1E926ADD2B8A">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>A75CF672-BBCD-EE7B-941C-0E90E5D9B7AC</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>1D519985-FCF0-DCB4-BEE7-CE6116F79673</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="278FD97E-846C-CFDD-9813-F5211FD55646" referredColumn="378F80A5-8197-3252-2FCC-101ACC13C5AC"/>
+</associations>
+</Column>
+<Column name="id_viaje" id="F755F9CC-07AC-3E86-C720-62C220C319A6">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>2EED89C7-6288-C878-8B93-CECD05339B6A</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>1D519985-FCF0-DCB4-BEE7-CE6116F79673</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="CA613007-4391-109A-5B56-39626C6F919D" referredColumn="A427E8AA-FBCE-7E98-D13B-3C9FE810CEB9"/>
+</associations>
+</Column>
+<Column name="id_bus" id="4BC5740B-6FFC-86B6-B3CD-9E601CC321B9">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>AA995644-7FB7-C67D-BE69-E5C70922F110</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>CD5817C3-F860-364C-4196-151997A686E3</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="0C17CA01-24F2-FB8A-44B8-AB805A2645D9" referredColumn="064FE7A3-5112-ADF7-89E4-F8528D3FBBA6"/>
+<colAssociation fkAssociation="CA613007-4391-109A-5B56-39626C6F919D" referredColumn="01EB3AB2-6E63-8652-518B-E5363C849E05"/>
+</associations>
+</Column>
+<Column name="nro_asiento" id="D0FD968C-B615-8AD2-B824-E5DB97C7D2A5">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>534FFCBB-BCBB-F787-C902-0A5428ECF27A</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>B0BDEF8E-7A33-8FDD-86FE-249E7D97C871</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="0C17CA01-24F2-FB8A-44B8-AB805A2645D9" referredColumn="F3087044-1E2B-9A91-D40F-0B4BD779541F"/>
+</associations>
+</Column>
+<Column name="id_pasajero" id="A081E429-D952-16AE-018B-97EC939EF8AF">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>3750AB1F-3467-6C14-03C8-3E783627243C</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>1D519985-FCF0-DCB4-BEE7-CE6116F79673</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="269CD00E-4B1F-2BDD-41DD-0CBA6A4CB7E6" referredColumn="F5E7DF3F-5528-3310-F7EE-1244396E1EDD"/>
+</associations>
+</Column>
+<Column name="id_tarifa" id="5AECFE06-AB1A-708A-7429-223BAF0E0361">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>3FA7A5ED-B5E3-161E-1AED-1E9E5C93EC7A</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>1D519985-FCF0-DCB4-BEE7-CE6116F79673</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="9BF6C6E3-BBA9-A3FD-58FC-13E4D07A733D" referredColumn="45074ED9-8AF4-7B19-8363-EF684796BA40"/>
+</associations>
+</Column>
+<Column name="precio_aplicado" id="96BDF21A-8A81-BE48-7D44-23F8EB8C9FF2">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>DFD2BAA1-3574-8F4A-E1BD-7BF7651980D3</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>856E43B8-BA9B-0FB8-64FA-E5E98568CBF1</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="descuento" id="D4808BBC-D3C9-AE7B-F069-4F0F01ECB8A9">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>05B6150C-96DA-0DE4-C9A7-638629AD9188</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>856E43B8-BA9B-0FB8-64FA-E5E98568CBF1</domain>
+<defaultValue>0</defaultValue>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="id_estado" id="63193F88-09C0-E9F0-A9B5-093072D7EC53">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>D8348C1D-96F6-CCEB-994C-C1A03EFD0B0D</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>B0BDEF8E-7A33-8FDD-86FE-249E7D97C871</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="F6A8A356-7734-8902-2546-23D74417E3EB" referredColumn="A0221CE8-AA83-DF6D-B657-343F1FE629C3"/>
+</associations>
+</Column>
+<Column name="fecha_emision" id="C4596AE2-209D-F382-0603-82CE8DF01E44">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>E2F00383-8382-24A9-A923-22A4563CAD5D</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT015</logicalDatatype>
+<domain>875BD0EA-1C85-3761-2DAB-265BDCDC5F83</domain>
+<defaultValue>SYSTIMESTAMP</defaultValue>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="F65A477B-5446-265B-3445-C1560A3BB095" name="pk_pasaje">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>E8500719-70C7-FB74-729B-02BC378915F0</importedID>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="507DD66F-9B8C-613A-F74A-1A751124CC59"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="EB2BFD5C-814D-B58C-2FB9-5B8B0915BEB3" name="fk_pasaje_asiento">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="4BC5740B-6FFC-86B6-B3CD-9E601CC321B9"/>
+<colUsage columnID="D0FD968C-B615-8AD2-B824-E5DB97C7D2A5"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="531800A4-D19D-A265-8223-48AD5B437026" name="fk_pasaje_estado">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="63193F88-09C0-E9F0-A9B5-093072D7EC53"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="4A1034F4-FFAB-1DD7-1E19-82E9F4928DC0" name="fk_pasaje_pasajero">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="A081E429-D952-16AE-018B-97EC939EF8AF"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="7DB7E217-4EF1-426F-E62C-2DA5383E64D4" name="fk_pasaje_tarifa">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="5AECFE06-AB1A-708A-7429-223BAF0E0361"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="92D79F52-39FC-6D4F-332C-91C5D3D83CED" name="fk_pasaje_venta">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="4FF01A12-D66B-7B5C-28D8-1E926ADD2B8A"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="D54ABB82-6659-E2A5-6334-52BB54B4FAD6" name="fk_pasaje_viaje_bus">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="F755F9CC-07AC-3E86-C720-62C220C319A6"/>
+<colUsage columnID="4BC5740B-6FFC-86B6-B3CD-9E601CC321B9"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+<tableCheckConstraints itemClass="oracle.dbtools.crest.model.design.constraint.TableLevelConstraint">
+<tableCheckConstraint name="ck_pasaje_precio" directorySegmentName="seg_0" id="EF175559-9EEB-C869-5A59-238D4FD360D2">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>85F3989E-E363-1E1C-41E5-6CDF130ADF3A</importedID>
+<rule><![CDATA[precio_aplicado >= 0]]></rule>
+</tableCheckConstraint>
+<tableCheckConstraint name="ck_pasaje_descuento" directorySegmentName="seg_0" id="42F24479-8915-FC03-6559-4FF8547BB92C">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>C650996B-2E56-9A39-FB5D-A0D6FE9E8F97</importedID>
+<rule><![CDATA[descuento >= 0 AND descuento <= precio_aplicado]]></rule>
+</tableCheckConstraint>
+</tableCheckConstraints>
+</Table>

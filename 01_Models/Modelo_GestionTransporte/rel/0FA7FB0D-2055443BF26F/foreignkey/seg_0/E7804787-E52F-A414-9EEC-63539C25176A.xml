@@ -1,0 +1,18 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<FKIndexAssociation class="oracle.dbtools.crest.model.design.relational.FKIndexAssociation" directorySegmentName="seg_0" id="E7804787-E52F-A414-9EEC-63539C25176A" containerWithKeyObject="AC4D7AE9-3E57-D06E-CB95-A315524DE395" localFKIndex="AA532DEC-A3EE-147E-07D6-3729B38C5989" name="fk_tarifa_ruta">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>9DB04A94-0CBA-626D-C718-4B1880E692A9</importedID>
+<referredTableLongName>ruta</referredTableLongName>
+<deleteRule>NO ACTION</deleteRule>
+<referredTableID>9C1B42D0-C0FD-B582-11A3-E6E84335C908</referredTableID>
+<keyObject>B0BD6EA8-A006-DA67-E9F6-7E7253A543DC</keyObject>
+<referredKeyID>B0BD6EA8-A006-DA67-E9F6-7E7253A543DC</referredKeyID>
+<mandatory>true</mandatory>
+<refColNames>id_ruta</refColNames>
+<transferable>true</transferable>
+<rely>false</rely>
+<columnDependencyConstraintGenerateInDDL>true</columnDependencyConstraintGenerateInDDL>
+</FKIndexAssociation>

@@ -1,0 +1,13 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<OSDM_Design class="oracle.dbtools.crest.model.design.Design" name="Modelo_GestionTransporte" id="7731FFC8-CDC7-D8B0-CCE5-76BF2B3D0475" version="3.5">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-24 01:09:40 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<capitalNames>false</capitalNames>
+<designId>7731FFC8-CDC7-D8B0-CCE5-76BF2B3D0475</designId>
+<usedDesignStorageDescriptors>
+<designDescr class="oracle.dbtools.crest.model.design.Design$DesignStorageDesc" id="E2BB915E-7A7A-9D5D-7A42-5EC4E6C5CAAA">
+<designStoragePath>/Modelo_GestionTransporte_DDL</designStoragePath>
+</designDescr>
+</usedDesignStorageDescriptors>
+</OSDM_Design>

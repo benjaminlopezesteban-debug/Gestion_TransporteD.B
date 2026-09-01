@@ -1,0 +1,18 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<FKIndexAssociation class="oracle.dbtools.crest.model.design.relational.FKIndexAssociation" directorySegmentName="seg_0" id="4A172114-9C43-2C61-C4E3-910B63604C02" containerWithKeyObject="B81F655A-1231-51C1-BCC5-C72C5FEA75FE" localFKIndex="3451164D-89C4-6294-5D0D-D0ADAF597E92" name="fk_asiento_bus">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>65706EF2-24CD-EDF2-8DEB-E1EEC181165E</importedID>
+<referredTableLongName>bus</referredTableLongName>
+<deleteRule>NO ACTION</deleteRule>
+<referredTableID>3334D740-C487-E62F-629E-5522F763BC31</referredTableID>
+<keyObject>9EED1B98-7E16-B3EF-B814-D017324A0FF0</keyObject>
+<referredKeyID>9EED1B98-7E16-B3EF-B814-D017324A0FF0</referredKeyID>
+<mandatory>true</mandatory>
+<refColNames>id_bus</refColNames>
+<transferable>true</transferable>
+<rely>false</rely>
+<columnDependencyConstraintGenerateInDDL>true</columnDependencyConstraintGenerateInDDL>
+</FKIndexAssociation>

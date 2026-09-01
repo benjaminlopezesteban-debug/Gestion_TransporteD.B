@@ -1,0 +1,120 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="09D557E0-91A5-5EB2-8BD9-52867A648554" name="venta">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>D9C8082D-8FAD-CD9D-B6CB-6B0392E8883F</importedID>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="id_venta" id="378F80A5-8197-3252-2FCC-101ACC13C5AC">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>99D62EEF-AADE-08D3-149F-E4319A8CEF66</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>1D519985-FCF0-DCB4-BEE7-CE6116F79673</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="id_pasajero_comprador" id="9FEE816B-3F2C-29E1-550B-49625448A2A2">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>AA8DB2C0-BD94-CB4B-005F-3ACF663EA15D</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>1D519985-FCF0-DCB4-BEE7-CE6116F79673</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="EAC9A3DC-7A66-DFD5-667A-935C26E61449" referredColumn="F5E7DF3F-5528-3310-F7EE-1244396E1EDD"/>
+</associations>
+</Column>
+<Column name="fecha_hora" id="31308B7C-E203-A5F6-95D6-4439802C2E57">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>7B3556DB-2413-0A1C-2BF7-BBD8D75F0BBA</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT015</logicalDatatype>
+<domain>875BD0EA-1C85-3761-2DAB-265BDCDC5F83</domain>
+<defaultValue>SYSTIMESTAMP</defaultValue>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="canal" id="80884DB5-6999-2315-E88E-AFADC2158D8A">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>072C3658-FAF3-00CC-A2D4-FBFB34587624</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<domain>A0D167F7-0CE4-3614-0834-ED157772F9DE</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="medio_pago" id="9F43C0F9-5A11-3E6E-766B-9820A35D5DA7">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>EB29AF17-5969-C4EF-2630-A5F8AABB9B94</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<domain>A0D167F7-0CE4-3614-0834-ED157772F9DE</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="338353E3-4409-C768-114D-3673E4F5ECF9" name="pk_venta">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>8E882B25-6760-2934-72FF-4FAAFBFE2A46</importedID>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="378F80A5-8197-3252-2FCC-101ACC13C5AC"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="5BCAE49F-E479-5271-5D85-0D5EAAEDE1D1" name="fk_venta_comprador">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="9FEE816B-3F2C-29E1-550B-49625448A2A2"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+<tableCheckConstraints itemClass="oracle.dbtools.crest.model.design.constraint.TableLevelConstraint">
+<tableCheckConstraint name="ck_venta_canal" directorySegmentName="seg_0" id="278BDE65-CB2D-F252-2A5A-268A51F9362D">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>CADCBF31-E3DF-501D-56A6-B7BE46135E36</importedID>
+<rule><![CDATA[canal IN ('WEB','MOV','TER','AGE')]]></rule>
+</tableCheckConstraint>
+<tableCheckConstraint name="ck_venta_medio" directorySegmentName="seg_0" id="4B5E5F4F-2545-6172-E794-E5BB0E5250B1">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>14ED215B-02A5-4CC2-2C30-928A6D96DB8F</importedID>
+<rule><![CDATA[medio_pago IN ('TDC','TDB','EFE','TRA')]]></rule>
+</tableCheckConstraint>
+</tableCheckConstraints>
+</Table>

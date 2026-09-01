@@ -1,0 +1,114 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Entity class="oracle.dbtools.crest.model.design.logical.Entity" directorySegmentName="seg_0" id="2E92E1EA-B6D1-3B0F-C61A-88CF18358597" name="ASIENTO_BUS">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-24 01:40:11 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<engineerTo>
+<item key="0FA7FB0D-A261-7FA1-D859-2055443BF26F" value="true"/>
+</engineerTo>
+<adequatelyNormalized>NO</adequatelyNormalized>
+<expectedVolumes>0</expectedVolumes>
+<fwdEngineeringStrategyName>Single Table</fwdEngineeringStrategyName>
+<growthPercent>0</growthPercent>
+<growthType>Year</growthType>
+<maxVolumes>9999999</maxVolumes>
+<minVolumes>0</minVolumes>
+<normalForm>Third</normalForm>
+<attributes itemClass="oracle.dbtools.crest.model.design.logical.Attribute">
+<Attribute name="id_asiento" id="B2D0FD41-58FD-4A24-C463-86047588D2FC">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-24 02:00:49 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<engineerTo>
+<item key="0FA7FB0D-A261-7FA1-D859-2055443BF26F" value="true"/>
+</engineerTo>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="id_servicio" id="BF1C3AF7-E665-D4F9-2F7D-6C66EF924B4E">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-24 22:25:17 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<engineerTo>
+<item key="0FA7FB0D-A261-7FA1-D859-2055443BF26F" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="estado" id="BBD294B1-3857-3C7E-2435-DA03F2271A74">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-24 02:01:24 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<engineerTo>
+<item key="0FA7FB0D-A261-7FA1-D859-2055443BF26F" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="nro_asiento" id="15752910-2BCC-7404-0246-D347532AFC59">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-24 22:13:24 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<engineerTo>
+<item key="0FA7FB0D-A261-7FA1-D859-2055443BF26F" value="true"/>
+</engineerTo>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="precio" id="AED8E175-D91C-0557-20A9-3AD19FE28575">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-25 00:50:16 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<engineerTo>
+<item key="0FA7FB0D-A261-7FA1-D859-2055443BF26F" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="id_detalle" id="FC71A605-4AC6-8F0F-C7D9-5F98688BED5C">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-25 00:53:22 UTC</createdTime>
+<generatorID>3EABEE3A-BD2B-54A9-501E-CACA56BBF041</generatorID>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<engineerTo>
+<item key="0FA7FB0D-A261-7FA1-D859-2055443BF26F" value="true"/>
+</engineerTo>
+<referedAttribute>914B00D4-CF8F-852F-E6AF-577C477F86FA</referedAttribute>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="id_servicio1" id="0061185C-6650-69B8-A0B6-83EC8B035340">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 00:43:46 UTC</createdTime>
+<generatorID>2E33D8D6-6E84-79E1-ABB6-A1E64D37826D</generatorID>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<engineerTo>
+<item key="0FA7FB0D-A261-7FA1-D859-2055443BF26F" value="true"/>
+</engineerTo>
+<referedAttribute>44F170A3-DD28-8D9C-072A-A179BD19ADDC</referedAttribute>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+</attributes>
+<identifiers itemClass="oracle.dbtools.crest.model.design.logical.CandidateKey">
+<identifier id="324FC1EF-5C42-BC03-BD24-D01C79ED1B2E" name="ASIENTO_BUS PK">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-24 22:19:18 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<engineerTo>
+<item key="0FA7FB0D-A261-7FA1-D859-2055443BF26F" value="true"/>
+</engineerTo>
+<pk>true</pk>
+<usedAttributes>
+<attributeRef>B2D0FD41-58FD-4A24-C463-86047588D2FC</attributeRef>
+<attributeRef>BF1C3AF7-E665-D4F9-2F7D-6C66EF924B4E</attributeRef>
+</usedAttributes>
+</identifier>
+</identifiers>
+</Entity>

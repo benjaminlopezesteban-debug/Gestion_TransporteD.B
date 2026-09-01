@@ -1,0 +1,121 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="B81F655A-1231-51C1-BCC5-C72C5FEA75FE" name="asiento">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>115C9BFC-5480-87E7-38C1-FE33A270389C</importedID>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="id_bus" id="064FE7A3-5112-ADF7-89E4-F8528D3FBBA6">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>5381F031-2176-23E6-4F84-7655DC62D79C</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>CD5817C3-F860-364C-4196-151997A686E3</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="4A172114-9C43-2C61-C4E3-910B63604C02" referredColumn="0D1B36FF-9EAA-5B15-813F-564523B2452A"/>
+</associations>
+</Column>
+<Column name="nro_asiento" id="F3087044-1E2B-9A91-D40F-0B4BD779541F">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>6293FBD9-6AD4-A846-8D73-E67410F8CE2C</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>B0BDEF8E-7A33-8FDD-86FE-249E7D97C871</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="id_tipo_asiento" id="03F99FA7-CAC1-FE01-D17A-7875C401668C">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>B65B62EC-0D05-056F-5681-78E9F65709DE</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>B0BDEF8E-7A33-8FDD-86FE-249E7D97C871</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="22EC3189-F90C-2E01-C093-5C09F87969FB" referredColumn="DD2E9876-9EDA-43D6-AF65-43B2491E0263"/>
+</associations>
+</Column>
+<Column name="piso" id="B7868F85-2B19-0365-8C44-3904566DE632">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>263F88D5-F237-9C9F-46E2-DD75127D26FA</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>99404B0D-4105-5746-CA81-9310C32DCF3E</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="4993BE28-C1D8-C056-BA59-6ACB1517FC9B" name="pk_asiento">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>B36C8233-AD94-6227-78FB-3FBBFC33DA5C</importedID>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="064FE7A3-5112-ADF7-89E4-F8528D3FBBA6"/>
+<colUsage columnID="F3087044-1E2B-9A91-D40F-0B4BD779541F"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="3451164D-89C4-6294-5D0D-D0ADAF597E92" name="fk_asiento_bus">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="064FE7A3-5112-ADF7-89E4-F8528D3FBBA6"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="36F20A4E-B74B-8B75-845D-EB1C09B1E29D" name="fk_asiento_tipo">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="03F99FA7-CAC1-FE01-D17A-7875C401668C"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+<tableCheckConstraints itemClass="oracle.dbtools.crest.model.design.constraint.TableLevelConstraint">
+<tableCheckConstraint name="ck_asiento_nro" directorySegmentName="seg_0" id="AA7EE74E-AB7F-2F43-A96F-ABB4EC15E4ED">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>D1A0AA38-49E4-0D94-8C27-9DD9527A0185</importedID>
+<rule><![CDATA[nro_asiento > 0]]></rule>
+</tableCheckConstraint>
+<tableCheckConstraint name="ck_asiento_piso" directorySegmentName="seg_0" id="0A5E5325-9448-EAF4-F049-3840FCDC76FD">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>1DECAB7C-F517-86BD-0318-34A42517E0CF</importedID>
+<rule><![CDATA[piso IN (1,2)]]></rule>
+</tableCheckConstraint>
+</tableCheckConstraints>
+</Table>

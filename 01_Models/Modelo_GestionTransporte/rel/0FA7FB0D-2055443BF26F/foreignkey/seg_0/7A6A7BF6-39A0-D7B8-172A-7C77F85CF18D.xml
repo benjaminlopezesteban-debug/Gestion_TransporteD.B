@@ -1,0 +1,18 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<FKIndexAssociation class="oracle.dbtools.crest.model.design.relational.FKIndexAssociation" directorySegmentName="seg_0" id="7A6A7BF6-39A0-D7B8-172A-7C77F85CF18D" containerWithKeyObject="AC4D7AE9-3E57-D06E-CB95-A315524DE395" localFKIndex="103D0FAA-06F5-5335-24FB-CF12DC6FE7DE" name="fk_tarifa_tipo">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>C5694BB8-CD76-D3F2-5D76-9D9B000A8F51</importedID>
+<referredTableLongName>tipo_asiento</referredTableLongName>
+<deleteRule>NO ACTION</deleteRule>
+<referredTableID>B0D5BC81-389A-3F9D-677E-6FE192EE143E</referredTableID>
+<keyObject>E2CC944A-0CB1-681D-6317-F751C82B10E6</keyObject>
+<referredKeyID>E2CC944A-0CB1-681D-6317-F751C82B10E6</referredKeyID>
+<mandatory>true</mandatory>
+<refColNames>id_tipo_asiento</refColNames>
+<transferable>true</transferable>
+<rely>false</rely>
+<columnDependencyConstraintGenerateInDDL>true</columnDependencyConstraintGenerateInDDL>
+</FKIndexAssociation>

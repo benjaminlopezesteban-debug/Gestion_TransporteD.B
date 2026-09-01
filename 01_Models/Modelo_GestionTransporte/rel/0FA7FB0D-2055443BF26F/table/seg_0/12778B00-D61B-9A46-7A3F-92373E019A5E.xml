@@ -1,0 +1,102 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="12778B00-D61B-9A46-7A3F-92373E019A5E" name="viaje_conductor">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>DFB9F612-8E90-7994-C95E-356FF7413C19</importedID>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="id_viaje" id="F1714CB5-6B6C-9631-0A14-21AB5B126762">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>9CC42F37-53B8-0F3C-D3CC-06EFCD64BCF3</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>1D519985-FCF0-DCB4-BEE7-CE6116F79673</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="4CAA7FDF-840E-F310-B8B9-D35AACDA6BA1" referredColumn="A427E8AA-FBCE-7E98-D13B-3C9FE810CEB9"/>
+</associations>
+</Column>
+<Column name="id_conductor" id="D7BFF2BA-21BE-25B7-303F-BF0E4081A528">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>EDADD6DB-20AF-33AF-0A7A-33F0016E69F3</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>CD5817C3-F860-364C-4196-151997A686E3</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="BCA18F01-2E04-8B6F-545D-1CE11FB4DD74" referredColumn="87A4F201-DA21-22CB-0663-03FF005CA641"/>
+</associations>
+</Column>
+<Column name="rol" id="4D8BFC13-44D4-DB51-7E62-236F9FE527CE">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>A2ED4770-C3B9-1962-E31B-F5D825395EC9</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<domain>A0D167F7-0CE4-3614-0834-ED157772F9DE</domain>
+<defaultValue>&apos;TIT&apos;</defaultValue>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="BE95B1DF-70D5-7137-83C3-DDD4BB859C5A" name="pk_viaje_conductor">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>A1125367-ABD5-A183-E970-4ECB2DC02023</importedID>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="F1714CB5-6B6C-9631-0A14-21AB5B126762"/>
+<colUsage columnID="D7BFF2BA-21BE-25B7-303F-BF0E4081A528"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="57EC5B6C-D991-BBFD-FD20-1BFED07F64DB" name="fk_vc_conductor">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="D7BFF2BA-21BE-25B7-303F-BF0E4081A528"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="C902D6CA-FA8B-1B53-57EA-8C173A9B5B24" name="fk_vc_viaje">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="F1714CB5-6B6C-9631-0A14-21AB5B126762"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+<tableCheckConstraints itemClass="oracle.dbtools.crest.model.design.constraint.TableLevelConstraint">
+<tableCheckConstraint name="ck_vc_rol" directorySegmentName="seg_0" id="7D88D279-FF0A-F536-7252-A363C5CA94AC">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>4C125D6D-144F-1F28-4B29-0A50A7B2DDE7</importedID>
+<rule><![CDATA[rol IN ('TIT','REL')]]></rule>
+</tableCheckConstraint>
+</tableCheckConstraints>
+</Table>

@@ -1,0 +1,280 @@
+Oracle SQL Developer Data Modeler 24.3.1.351.0831
+Oracle SQL Developer Data Modeler Log de Importación
+Fecha y Hora: 2026-08-26 21:08:59 CLT
+Nombre de Diseño: Modelo_GestionTransporte
+RDBMS : Oracle Database 21c
+
+		Todas las Sentencias: 		148
+		Sentencias Importadas: 	14
+		Sentencias Fallidas: 		0
+		Sentencias No Reconocidas: 	134
+
+<<<<< No Reconocido >>>>>
+DROP TABLE pasaje_estado_hist CASCADE CONSTRAINTS PURGE
+
+DROP TABLE pasaje             CASCADE CONSTRAINTS PURGE
+
+DROP TABLE venta              CASCADE CONSTRAINTS PURGE
+
+DROP TABLE tarifa             CASCADE CONSTRAINTS PURGE
+
+DROP TABLE pasajero           CASCADE CONSTRAINTS PURGE
+
+DROP TABLE viaje_conductor    CASCADE CONSTRAINTS PURGE
+
+DROP TABLE viaje              CASCADE CONSTRAINTS PURGE
+
+DROP TABLE conductor          CASCADE CONSTRAINTS PURGE
+
+DROP TABLE asiento            CASCADE CONSTRAINTS PURGE
+
+DROP TABLE bus                CASCADE CONSTRAINTS PURGE
+
+DROP TABLE ruta               CASCADE CONSTRAINTS PURGE
+
+DROP TABLE estado_pasaje      CASCADE CONSTRAINTS PURGE
+
+DROP TABLE tipo_asiento       CASCADE CONSTRAINTS PURGE
+
+DROP TABLE terminal           CASCADE CONSTRAINTS PURGE
+
+INSERT INTO terminal (id_terminal, nombre_terminal, ciudad, direccion) VALUES (1, 'Terminal Alameda',    'Santiago',    'Av. Libertador Bernardo O''Higgins 3750')
+
+INSERT INTO terminal (id_terminal, nombre_terminal, ciudad, direccion) VALUES (2, 'Terminal Rodoviario', 'La Serena',   'Av. El Santo 400')
+
+INSERT INTO terminal (id_terminal, nombre_terminal, ciudad, direccion) VALUES (3, 'Terminal Collao',     'Concepcion',  'Av. General Bonilla 1855')
+
+INSERT INTO terminal (id_terminal, nombre_terminal, ciudad, direccion) VALUES (4, 'Terminal Valparaiso', 'Valparaiso',  'Av. Pedro Montt 2800')
+
+INSERT INTO terminal (id_terminal, nombre_terminal, ciudad, direccion) VALUES (5, 'Terminal Rodoviario', 'Temuco',      'Vicente Perez Rosales 01609')
+
+INSERT INTO tipo_asiento (id_tipo_asiento, codigo, nombre) VALUES (1, 'SEM', 'Semi Cama')
+
+INSERT INTO tipo_asiento (id_tipo_asiento, codigo, nombre) VALUES (2, 'SAL', 'Salon Cama')
+
+INSERT INTO tipo_asiento (id_tipo_asiento, codigo, nombre) VALUES (3, 'PRE', 'Premium Suite')
+
+INSERT INTO estado_pasaje (id_estado, codigo, nombre, ocupa_asiento) VALUES (1, 'PEN', 'Pendiente de pago', 'S')
+
+INSERT INTO estado_pasaje (id_estado, codigo, nombre, ocupa_asiento) VALUES (2, 'VEN', 'Vendido',           'S')
+
+INSERT INTO estado_pasaje (id_estado, codigo, nombre, ocupa_asiento) VALUES (3, 'UTI', 'Utilizado',         'S')
+
+INSERT INTO estado_pasaje (id_estado, codigo, nombre, ocupa_asiento) VALUES (4, 'ANU', 'Anulado',           'N')
+
+INSERT INTO ruta (id_ruta, id_terminal_origen, id_terminal_destino, distancia_km, duracion_estimada_min) VALUES (1, 1, 2, 471, 390)
+
+INSERT INTO ruta (id_ruta, id_terminal_origen, id_terminal_destino, distancia_km, duracion_estimada_min) VALUES (2, 2, 1, 471, 390)
+
+INSERT INTO ruta (id_ruta, id_terminal_origen, id_terminal_destino, distancia_km, duracion_estimada_min) VALUES (3, 1, 3, 500, 420)
+
+INSERT INTO ruta (id_ruta, id_terminal_origen, id_terminal_destino, distancia_km, duracion_estimada_min) VALUES (4, 3, 1, 500, 420)
+
+INSERT INTO ruta (id_ruta, id_terminal_origen, id_terminal_destino, distancia_km, duracion_estimada_min) VALUES (5, 1, 5, 675, 540)
+
+INSERT INTO ruta (id_ruta, id_terminal_origen, id_terminal_destino, distancia_km, duracion_estimada_min) VALUES (6, 1, 4, 120, 105)
+
+INSERT INTO bus (id_bus, patente, modelo, anio_fabricacion, fecha_compra) VALUES (1, 'JKLM45', 'Mercedes-Benz O500RSD', 2021, DATE '2021-03-15')
+
+INSERT INTO bus (id_bus, patente, modelo, anio_fabricacion, fecha_compra) VALUES (2, 'PQRS78', 'Volvo 9800',            2019, DATE '2019-11-02')
+
+INSERT INTO bus (id_bus, patente, modelo, anio_fabricacion, fecha_compra) VALUES (3, 'TUVW12', 'Scania K410',           2023, DATE '2023-07-20')
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1,  1, 2, 1)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1,  2, 2, 1)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1,  3, 2, 1)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1,  4, 2, 1)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1,  5, 1, 2)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1,  6, 1, 2)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1,  7, 1, 2)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1,  8, 1, 2)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1,  9, 1, 2)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1, 10, 1, 2)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1, 11, 1, 2)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1, 12, 1, 2)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2,  1, 2, 1)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2,  2, 2, 1)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2,  3, 2, 1)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2,  4, 2, 1)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2,  5, 1, 2)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2,  6, 1, 2)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2,  7, 1, 2)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2,  8, 1, 2)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2,  9, 1, 2)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2, 10, 1, 2)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (3,  1, 3, 1)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (3,  2, 3, 1)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (3,  3, 2, 1)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (3,  4, 2, 1)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (3,  5, 1, 2)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (3,  6, 1, 2)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (3,  7, 1, 2)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (3,  8, 1, 2)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (3,  9, 1, 2)
+
+INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (3, 10, 1, 2)
+
+INSERT INTO conductor (id_conductor, run, dv, pnombre, snombre, papellido, sapellido, nro_licencia, fecha_contrato) VALUES (1, 12345678, '9', 'Juan',  'Carlos',  'Perez',   'Soto',   'A3-118422', DATE '2018-04-02')
+
+INSERT INTO conductor (id_conductor, run, dv, pnombre, snombre, papellido, sapellido, nro_licencia, fecha_contrato) VALUES (2,  9876543, '1', 'Maria', 'Elena',   'Rojas',   'Munoz',  'A3-224901', DATE '2020-01-13')
+
+INSERT INTO conductor (id_conductor, run, dv, pnombre, snombre, papellido, sapellido, nro_licencia, fecha_contrato) VALUES (3, 15678234, 'K', 'Pedro', 'Antonio', 'Silva',   'Cortes', 'A3-330755', DATE '2019-08-26')
+
+INSERT INTO conductor (id_conductor, run, dv, pnombre, snombre, papellido, sapellido, nro_licencia, fecha_contrato) VALUES (4, 17234567, '2', 'Ana',   'Isabel',  'Fuentes', 'Vera',   'A3-401238', DATE '2022-05-09')
+
+INSERT INTO viaje (id_viaje, id_ruta, id_bus, salida_prog, llegada_prog, estado_viaje) VALUES (1, 1, 1, TIMESTAMP '2026-09-01 08:00:00', TIMESTAMP '2026-09-01 14:30:00', 'FIN')
+
+INSERT INTO viaje (id_viaje, id_ruta, id_bus, salida_prog, llegada_prog, estado_viaje) VALUES (2, 2, 1, TIMESTAMP '2026-09-01 22:00:00', TIMESTAMP '2026-09-02 04:30:00', 'FIN')
+
+INSERT INTO viaje (id_viaje, id_ruta, id_bus, salida_prog, llegada_prog, estado_viaje) VALUES (3, 3, 2, TIMESTAMP '2026-09-01 09:00:00', TIMESTAMP '2026-09-01 16:00:00', 'FIN')
+
+INSERT INTO viaje (id_viaje, id_ruta, id_bus, salida_prog, llegada_prog, estado_viaje) VALUES (4, 5, 3, TIMESTAMP '2026-09-02 21:00:00', TIMESTAMP '2026-09-03 06:00:00', 'PRO')
+
+INSERT INTO viaje (id_viaje, id_ruta, id_bus, salida_prog, llegada_prog, estado_viaje) VALUES (5, 6, 2, TIMESTAMP '2026-09-02 07:30:00', TIMESTAMP '2026-09-02 09:15:00', 'PRO')
+
+INSERT INTO viaje (id_viaje, id_ruta, id_bus, salida_prog, llegada_prog, estado_viaje) VALUES (6, 1, 1, TIMESTAMP '2026-09-03 08:00:00', TIMESTAMP '2026-09-03 14:30:00', 'PRO')
+
+INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (1, 1, 'TIT')
+
+INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (1, 2, 'REL')
+
+INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (2, 1, 'TIT')
+
+INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (2, 2, 'REL')
+
+INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (3, 3, 'TIT')
+
+INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (4, 3, 'TIT')
+
+INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (4, 4, 'REL')
+
+INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (5, 4, 'TIT')
+
+INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (6, 2, 'TIT')
+
+INSERT INTO pasajero (id_pasajero, run, dv, pnombre, snombre, papellido, sapellido, mail, telefono) VALUES (1, 11222333, '4', 'Camila',    'Andrea',  'Torres',  'Lagos',   'camila.torres@correo.cl',   '+56911111111')
+
+INSERT INTO pasajero (id_pasajero, run, dv, pnombre, snombre, papellido, sapellido, mail, telefono) VALUES (2, 13444555, '6', 'Rodrigo',   'Esteban', 'Munoz',   'Diaz',    'rmunoz@correo.cl',          '+56922222222')
+
+INSERT INTO pasajero (id_pasajero, run, dv, pnombre, snombre, papellido, sapellido, mail, telefono) VALUES (3, 16555777, 'K', 'Valentina', 'Paz',     'Herrera', 'Nunez',   'vherrera@correo.cl',        '+56933333333')
+
+INSERT INTO pasajero (id_pasajero, run, dv, pnombre, snombre, papellido, sapellido, mail, telefono) VALUES (4, 10111222, '3', 'Sebastian', NULL,      'Castro',  'Rivas',   'scastro@correo.cl',         '+56944444444')
+
+INSERT INTO pasajero (id_pasajero, run, dv, pnombre, snombre, papellido, sapellido, mail, telefono) VALUES (5, 18999000, '1', 'Francisca', 'Belen',   'Alvarez', 'Soto',    'falvarez@correo.cl',        NULL)
+
+INSERT INTO pasajero (id_pasajero, run, dv, pnombre, snombre, papellido, sapellido, mail, telefono) VALUES (6, 14333222, '8', 'Matias',    'Alonso',  'Vega',    'Fuentes', 'mvega@correo.cl',           '+56966666666')
+
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 1, 1, 1, DATE '2026-01-01', NULL, 18900)
+
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 2, 1, 2, DATE '2026-01-01', NULL, 27500)
+
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 3, 2, 1, DATE '2026-01-01', NULL, 18900)
+
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 4, 2, 2, DATE '2026-01-01', NULL, 27500)
+
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 5, 3, 1, DATE '2026-01-01', NULL, 21000)
+
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 6, 3, 2, DATE '2026-01-01', NULL, 31000)
+
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 7, 5, 1, DATE '2026-01-01', NULL, 26500)
+
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 8, 5, 2, DATE '2026-01-01', NULL, 39900)
+
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 9, 5, 3, DATE '2026-01-01', NULL, 52000)
+
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES (10, 6, 1, DATE '2026-01-01', NULL,  4500)
+
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES (11, 1, 1, DATE '2025-06-01', DATE '2025-12-31', 16500)
+
+INSERT INTO venta (id_venta, id_pasajero_comprador, fecha_hora, canal, medio_pago) VALUES (1, 1, TIMESTAMP '2026-08-20 10:15:00', 'WEB', 'TDC')
+
+INSERT INTO venta (id_venta, id_pasajero_comprador, fecha_hora, canal, medio_pago) VALUES (2, 4, TIMESTAMP '2026-08-22 16:40:00', 'MOV', 'TDB')
+
+INSERT INTO venta (id_venta, id_pasajero_comprador, fecha_hora, canal, medio_pago) VALUES (3, 3, TIMESTAMP '2026-08-25 09:05:00', 'TER', 'EFE')
+
+INSERT INTO venta (id_venta, id_pasajero_comprador, fecha_hora, canal, medio_pago) VALUES (4, 6, TIMESTAMP '2026-08-26 18:20:00', 'WEB', 'TDC')
+
+INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (1, 1, 1, 1,  3, 1,  2, 27500,    0, 3, TIMESTAMP '2026-08-20 10:15:00')
+
+INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (2, 1, 1, 1,  4, 2,  2, 27500, 2750, 3, TIMESTAMP '2026-08-20 10:15:00')
+
+INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (3, 2, 4, 3,  1, 4,  9, 52000,    0, 2, TIMESTAMP '2026-08-22 16:40:00')
+
+INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (4, 2, 4, 3,  2, 5,  9, 52000, 5200, 2, TIMESTAMP '2026-08-22 16:40:00')
+
+INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (5, 2, 4, 3,  6, 6,  7, 26500,    0, 2, TIMESTAMP '2026-08-22 16:40:00')
+
+INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (6, 3, 3, 2,  7, 3,  5, 21000,    0, 4, TIMESTAMP '2026-08-25 09:05:00')
+
+INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (7, 4, 3, 2,  7, 6,  5, 21000,    0, 2, TIMESTAMP '2026-08-26 18:20:00')
+
+INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (8, 4, 5, 2,  5, 6, 10,  4500,    0, 1, TIMESTAMP '2026-08-26 18:20:00')
+
+INSERT INTO pasaje_estado_hist (id_pasaje, secuencia, fecha_hora, id_estado, usuario, motivo) VALUES (1, 1, TIMESTAMP '2026-08-20 10:15:00', 1, 'WEB_CHECKOUT',    NULL)
+
+INSERT INTO pasaje_estado_hist (id_pasaje, secuencia, fecha_hora, id_estado, usuario, motivo) VALUES (1, 2, TIMESTAMP '2026-08-20 10:17:00', 2, 'PASARELA_PAGO',   NULL)
+
+INSERT INTO pasaje_estado_hist (id_pasaje, secuencia, fecha_hora, id_estado, usuario, motivo) VALUES (1, 3, TIMESTAMP '2026-09-01 07:42:00', 3, 'VALIDADOR_AND12', NULL)
+
+INSERT INTO pasaje_estado_hist (id_pasaje, secuencia, fecha_hora, id_estado, usuario, motivo) VALUES (2, 1, TIMESTAMP '2026-08-20 10:15:00', 1, 'WEB_CHECKOUT',    NULL)
+
+INSERT INTO pasaje_estado_hist (id_pasaje, secuencia, fecha_hora, id_estado, usuario, motivo) VALUES (2, 2, TIMESTAMP '2026-08-20 10:17:00', 2, 'PASARELA_PAGO',   NULL)
+
+INSERT INTO pasaje_estado_hist (id_pasaje, secuencia, fecha_hora, id_estado, usuario, motivo) VALUES (2, 3, TIMESTAMP '2026-09-01 07:44:00', 3, 'VALIDADOR_AND12', NULL)
+
+INSERT INTO pasaje_estado_hist (id_pasaje, secuencia, fecha_hora, id_estado, usuario, motivo) VALUES (3, 1, TIMESTAMP '2026-08-22 16:40:00', 1, 'APP_MOVIL',       NULL)
+
+INSERT INTO pasaje_estado_hist (id_pasaje, secuencia, fecha_hora, id_estado, usuario, motivo) VALUES (3, 2, TIMESTAMP '2026-08-22 16:41:00', 2, 'PASARELA_PAGO',   NULL)
+
+INSERT INTO pasaje_estado_hist (id_pasaje, secuencia, fecha_hora, id_estado, usuario, motivo) VALUES (4, 1, TIMESTAMP '2026-08-22 16:40:00', 1, 'APP_MOVIL',       NULL)
+
+INSERT INTO pasaje_estado_hist (id_pasaje, secuencia, fecha_hora, id_estado, usuario, motivo) VALUES (4, 2, TIMESTAMP '2026-08-22 16:41:00', 2, 'PASARELA_PAGO',   NULL)
+
+INSERT INTO pasaje_estado_hist (id_pasaje, secuencia, fecha_hora, id_estado, usuario, motivo) VALUES (5, 1, TIMESTAMP '2026-08-22 16:40:00', 1, 'APP_MOVIL',       NULL)
+
+INSERT INTO pasaje_estado_hist (id_pasaje, secuencia, fecha_hora, id_estado, usuario, motivo) VALUES (5, 2, TIMESTAMP '2026-08-22 16:41:00', 2, 'PASARELA_PAGO',   NULL)
+
+INSERT INTO pasaje_estado_hist (id_pasaje, secuencia, fecha_hora, id_estado, usuario, motivo) VALUES (6, 1, TIMESTAMP '2026-08-25 09:05:00', 1, 'CAJA_ALAMEDA',    NULL)
+
+INSERT INTO pasaje_estado_hist (id_pasaje, secuencia, fecha_hora, id_estado, usuario, motivo) VALUES (6, 2, TIMESTAMP '2026-08-25 09:06:00', 2, 'CAJA_ALAMEDA',    NULL)
+
+INSERT INTO pasaje_estado_hist (id_pasaje, secuencia, fecha_hora, id_estado, usuario, motivo) VALUES (6, 3, TIMESTAMP '2026-08-26 11:30:00', 4, 'CALL_CENTER',     'Solicitud del pasajero, cambio de fecha de viaje')
+
+INSERT INTO pasaje_estado_hist (id_pasaje, secuencia, fecha_hora, id_estado, usuario, motivo) VALUES (7, 1, TIMESTAMP '2026-08-26 18:20:00', 1, 'WEB_CHECKOUT',    NULL)
+
+INSERT INTO pasaje_estado_hist (id_pasaje, secuencia, fecha_hora, id_estado, usuario, motivo) VALUES (7, 2, TIMESTAMP '2026-08-26 18:22:00', 2, 'PASARELA_PAGO',   NULL)
+
+INSERT INTO pasaje_estado_hist (id_pasaje, secuencia, fecha_hora, id_estado, usuario, motivo) VALUES (8, 1, TIMESTAMP '2026-08-26 18:20:00', 1, 'WEB_CHECKOUT',    NULL)
+
+COMMIT
+

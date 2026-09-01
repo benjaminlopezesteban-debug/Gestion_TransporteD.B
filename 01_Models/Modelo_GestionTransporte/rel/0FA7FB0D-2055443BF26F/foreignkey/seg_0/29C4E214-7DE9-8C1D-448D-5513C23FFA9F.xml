@@ -1,0 +1,18 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<FKIndexAssociation class="oracle.dbtools.crest.model.design.relational.FKIndexAssociation" directorySegmentName="seg_0" id="29C4E214-7DE9-8C1D-448D-5513C23FFA9F" containerWithKeyObject="9C1B42D0-C0FD-B582-11A3-E6E84335C908" localFKIndex="5CA87226-2AEE-E343-1E12-2B905F7F1D26" name="fk_ruta_origen">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>1002F52E-2DCD-3737-43B7-FC7A0E3786F2</importedID>
+<referredTableLongName>terminal</referredTableLongName>
+<deleteRule>NO ACTION</deleteRule>
+<referredTableID>F14674B0-8C2C-545E-28AC-D493E53BD3EE</referredTableID>
+<keyObject>ED9E35A0-B75F-4552-FC99-006D1845C7BD</keyObject>
+<referredKeyID>ED9E35A0-B75F-4552-FC99-006D1845C7BD</referredKeyID>
+<mandatory>true</mandatory>
+<refColNames>id_terminal</refColNames>
+<transferable>true</transferable>
+<rely>false</rely>
+<columnDependencyConstraintGenerateInDDL>true</columnDependencyConstraintGenerateInDDL>
+</FKIndexAssociation>

@@ -1,0 +1,153 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="9C1B42D0-C0FD-B582-11A3-E6E84335C908" name="ruta">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>DA242333-FFDC-8E12-9487-CA1BEA1CC078</importedID>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="id_ruta" id="7E68DA90-B6A3-91CE-62BA-AD15BB3BDE05">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>E34BCE91-D509-1352-3E4F-F259B2AC81C7</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>CD5817C3-F860-364C-4196-151997A686E3</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="id_terminal_origen" id="67BEF9E8-02B5-1489-28D3-BBC909A9400C">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>B7FBC000-7AFA-B359-7C8D-3C2F47001FD7</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>CD5817C3-F860-364C-4196-151997A686E3</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="29C4E214-7DE9-8C1D-448D-5513C23FFA9F" referredColumn="63A6621B-BE0A-40A6-844E-8FE460D75202"/>
+</associations>
+</Column>
+<Column name="id_terminal_destino" id="F8678EF7-8138-4D77-8B61-F8FBA51C4C87">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>F9A7DCC1-A387-1869-5908-F11AE75AC173</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>CD5817C3-F860-364C-4196-151997A686E3</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="9204FA98-8F08-A709-F2BC-34A8F9208AC9" referredColumn="63A6621B-BE0A-40A6-844E-8FE460D75202"/>
+</associations>
+</Column>
+<Column name="distancia_km" id="C52ECC12-D6A7-4A73-5445-51A5EB438040">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>C26EB6D1-1A4D-19CF-2116-D78DAD648094</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>CD5817C3-F860-364C-4196-151997A686E3</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="duracion_estimada_min" id="60B732D1-B30C-FDE0-618A-C26F114E3B9D">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>2842787E-7F7D-9DDB-0C70-5822456A8C2E</importedID>
+<use>0</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<domain>CD5817C3-F860-364C-4196-151997A686E3</domain>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="B0BD6EA8-A006-DA67-E9F6-7E7253A543DC" name="pk_ruta">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>31227EFE-8D4E-EAFE-F5A7-631B5CAB8892</importedID>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="7E68DA90-B6A3-91CE-62BA-AD15BB3BDE05"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="8345781E-C9C7-A073-13C4-8450043EC7E0" name="uk_ruta_od">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>B5C72849-663D-9930-4E3E-712B72B28A83</importedID>
+<indexState>Unique Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="67BEF9E8-02B5-1489-28D3-BBC909A9400C"/>
+<colUsage columnID="F8678EF7-8138-4D77-8B61-F8FBA51C4C87"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="27FCDCA8-7679-E98E-73F0-83DCAF264168" name="fk_ruta_destino">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="F8678EF7-8138-4D77-8B61-F8FBA51C4C87"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="5CA87226-2AEE-E343-1E12-2B905F7F1D26" name="fk_ruta_origen">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="67BEF9E8-02B5-1489-28D3-BBC909A9400C"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+<tableCheckConstraints itemClass="oracle.dbtools.crest.model.design.constraint.TableLevelConstraint">
+<tableCheckConstraint name="ck_ruta_od_distin" directorySegmentName="seg_0" id="145FCFC1-645A-874E-9EF5-ED99E6E83F91">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>CD64A459-A939-4B9B-8546-5F6E18FF7F42</importedID>
+<rule><![CDATA[id_terminal_origen <> id_terminal_destino]]></rule>
+</tableCheckConstraint>
+<tableCheckConstraint name="ck_ruta_distancia" directorySegmentName="seg_0" id="82367EC6-E8EC-1A29-1E3F-E33B4691598C">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>0DDE8531-E894-8041-D0FB-EBE783973A7F</importedID>
+<rule><![CDATA[distancia_km > 0]]></rule>
+</tableCheckConstraint>
+<tableCheckConstraint name="ck_ruta_duracion" directorySegmentName="seg_0" id="CD16D178-E113-B80F-9B11-E91406DBA99E">
+<sourceDDLFile>Modelo_GestionTransporte_DDL.sql</sourceDDLFile>
+<createdBy>benja</createdBy>
+<createdTime>2026-08-27 01:09:42 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<importedID>F0A4A156-4FF5-9B5A-2957-3526C913E0F8</importedID>
+<rule><![CDATA[duracion_estimada_min > 0]]></rule>
+</tableCheckConstraint>
+</tableCheckConstraints>
+</Table>
