@@ -33,22 +33,6 @@
 -- requisito formal y no por necesidad tecnica.
 --------------------------------------------------------------------------------
 
---------------------------------------------------------------------------------
--- TRAZABILIDAD CON LA DOCUMENTACION
---
---   Informe  : DP_Informe_Requerimiento.docx
---                9.1 Identificacion de funciones -> los 4 bloques de este archivo
---                7.1 Excepciones predefinidas    -> manejo de errores de cada bloque
---                4.2 Trazabilidad regla-mecanismo-> RN-01, RN-06, RN-07, RN-10
---   Anexo    : ANEXO_Tablas_de_Referencia.docx
---                Tabla 29 - Funciones almacenadas
---                Tabla 26 - Excepciones predefinidas de Oracle
---                Tabla  5 - Reglas de negocio del dominio
---                Tabla  6 - Trazabilidad entre reglas y mecanismos
---   Rubrica  : IE1.3.1 - control de excepciones (10% informe / 15% presentacion)
---              IE1.4.1 - evaluacion de funciones (15% informe / 15% presentacion)
---------------------------------------------------------------------------------
-
 SET SERVEROUTPUT ON SIZE UNLIMITED
 SET LINESIZE 140
 SET PAGESIZE 60 
@@ -59,8 +43,6 @@ SET PAGESIZE 60
 -- Entradas : p_id_ruta, p_id_tipo_asiento, p_fecha
 -- Devuelve : precio que rige para esa combinacion en esa fecha
 -- Sirve a  : RF-01 (venta)      Implementa : RN-07
--- Informe  : 9.1 (funcion), 7.1 (NO_DATA_FOUND y TOO_MANY_ROWS)
--- Anexo    : Tabla 29 (fn_tarifa_vigente), Tabla 26
 --
 -- Problema que resuelve: TARIFA conserva el historico completo de precios,
 -- porque RN-07 exige que el precio varie segun la condicion comercial. Por eso
@@ -82,7 +64,8 @@ DECLARE
     v_precio  tarifa.precio%TYPE;
 BEGIN
 
-    -- Una tarifa esta vigente si ya empezo y aun no ha terminado. 
+    -- Consulta la tarifa vigente para la combinacion dada en la fecha especificada. Esta vigente si ya empezo en la fecha y no ha vencido aun, o si no tiene fecha de vencimiento.
+    -- TRUNC elimina la hora para que la comparacion sea solo por fecha.
     SELECT tf.precio
         INTO   v_precio
         FROM   tarifa tf
@@ -112,8 +95,6 @@ END;
 -- Entradas : p_id_viaje
 -- Devuelve : cantidad minima de conductores que exige la duracion del viaje
 -- Sirve a  : RF-03 (programacion)      Implementa : RN-10
--- Informe  : 9.1 (funcion), 2.4 y 4.2 (RN-10)
--- Anexo    : Tabla 29 (fn_conductores_requeridos), Tabla 7 (jornada por ruta)
 --
 -- Problema que resuelve: la ley impide que un conductor supere las 5 horas de
 -- conduccion, de modo que un viaje largo debe repartirse entre varios. El
@@ -136,7 +117,7 @@ DECLARE
     c_max_horas     CONSTANT NUMBER := 5;   -- limite legal por conductor
 
 BEGIN
-    -- La duracion es un atributo de la ruta, no del viaje: el viaje solo la hereda al referenciarla.
+    -- Consulta la duracion de la ruta, un atributo que vive en ruta no del viaje: el viaje solo la hereda al referenciarla.
     SELECT r.duracion_estimada_min
         INTO   v_duracion_min
         FROM   viaje v
@@ -163,8 +144,6 @@ END;
 -- Entradas : p_id_viaje
 -- Devuelve : cantidad de asientos libres del viaje
 -- Sirve a  : RF-01 (venta), RF-04 (disponibilidad)   Implementa : RN-01, RN-06
--- Informe  : 9.1 (funcion), 4.2 (RN-01 y RN-06)
--- Anexo    : Tabla 29 (fn_asientos_disponibles), Tabla 6
 --
 -- Problema que resuelve: la disponibilidad no esta almacenada en ninguna parte
 -- y no debe estarlo. Guardarla como columna obligaria a mantenerla sincronizada
@@ -224,8 +203,6 @@ END;
 -- Entradas : p_id_viaje
 -- Devuelve : porcentaje de asientos ocupados del viaje
 -- Sirve a  : RF-04 (disponibilidad)
--- Informe  : 9.1 (funcion), 7.1 (ZERO_DIVIDE)
--- Anexo    : Tabla 29 (fn_porcentaje_ocupacion), Tabla 26
 --
 -- Problema que resuelve: la cantidad de asientos libres no permite comparar
 -- viajes entre si, porque los buses tienen capacidades distintas. Cinco asientos
@@ -252,12 +229,14 @@ DECLARE
     v_ocupados   PLS_INTEGER;
 
 BEGIN
+    -- Consulta la capacidad del bus y la cantidad de asientos registrados para el.
     SELECT COUNT(a.nro_asiento)
     INTO   v_capacidad
     FROM   viaje v
     JOIN   asiento a ON a.id_bus = v.id_bus
     WHERE  v.id_viaje = p_id_viaje;
 
+    -- Consulta los asientos ocupados: los pasajes de ese viaje cuyo estado mantiene el asiento tomado.
     SELECT COUNT(*)
     INTO   v_ocupados
     FROM   pasaje p
