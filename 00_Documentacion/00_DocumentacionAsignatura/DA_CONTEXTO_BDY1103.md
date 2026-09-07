@@ -91,16 +91,28 @@ El modelo original de 10 entidades fue auditado y **reemplazado**. El vigente es
 
 **Cerrado (30-ago-2026):**
 - Modelo auditado y rediseñado a 14 entidades en 3FN — ver §4.1.
-- DDL + poblamiento escritos y cargados en la BD local (`02_Scripts/DDL/`).
-- Resuelto el pendiente de BDY1102 sobre doble agenda de un mismo bus: `VIAJE` con `salida_prog`/`llegada_prog` permite comparar intervalos; el mecanismo anti-solapamiento (vista materializada `ON COMMIT` + `CHECK` imposible) está especificado, falta implementarlo.
 - Entorno Oracle local operativo: contenedor `oracle-practica`, service name **`FREEPDB1`**, esquema `BENJA` limpio.
+- Resuelto el pendiente de BDY1102 sobre doble agenda de un mismo bus: `VIAJE` con `salida_prog`/`llegada_prog` permite comparar intervalos.
+
+**Cerrado (05-sep-2026):**
+- **RN-10 incorporada**: por ley un conductor no puede superar 5 horas de conducción, de modo que todo viaje que exceda ese límite exige relevo. Justifica la existencia de `VIAJE_CONDUCTOR` como obligación legal y no como conveniencia.
+- Poblamiento del DDL rehecho con las **7 rutas reales del contexto de negocio** (Rancagua, Talca, Linares, Cauquenes, Chillán, Bulnes, Concepción). Antes usaba destinos que el negocio no cubre.
+- **Informe migrado a la plantilla del profesor** (17 secciones) y acotado a **12 páginas**. Las 29 tablas se trasladaron a `Anexos/ANEXO_Tablas_de_Referencia.docx`.
+
+**Cerrado (06-sep-2026):**
+- **Índice único parcial implementado** en el DDL para RN-06 y RN-09. Verificado con tres casos: impide la doble venta, permite el mismo asiento en otro viaje, y permite revender tras anular. Antes el informe lo declaraba sin que existiera.
+- **Script PL/SQL, niveles 1 y 2** escritos y ejecutados sin errores:
+  `01_Record_Varray.sql` (tipos compuestos), `02_Calculos.sql` (4 cálculos escalares),
+  `03_Consultas_Cursores.sql` (cursor sin parámetros, cursor con parámetro complejo, y dos cursores anidados simultáneos).
+- **El profesor descartó las vistas** y los elementos agregados: evaluará los scripts, sus flujos de trabajo y la justificación del diseño.
 
 **En curso:**
-- **Evaluación Parcial 1** — definición de requerimientos y estructura del proyecto (informe de ingeniería de software). Modalidad de trabajo: **mixta** — el asistente arma esqueleto y preguntas guía, Benjamin redacta el contenido.
+- **Nivel 3 del script** (`04_Operaciones.sql`): programación de viajes, venta y anulación. Es donde aparecen las excepciones definidas por el usuario.
+- Guía de construcción del script en `02_Scripts/GUIA_Construccion_Script.md`.
 
 **Próximo:**
-- Prueba de RA1: cursores explícitos con y sin parámetros, VARRAY, RECORD, excepciones.
-- Implementar el índice único parcial y las vistas materializadas anti-solapamiento.
+- Completar en el informe las secciones 8.2, 9.2, 10, 11, 12, 13 y 14.
+- Resolver con el profesor si en la Parcial 1 los procedimientos y triggers se implementan o sólo se evalúan (pregunta B-3 del cuaderno de definición).
 
 ## 7. Archivos asociados
 

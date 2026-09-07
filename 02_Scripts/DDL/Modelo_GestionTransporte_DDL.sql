@@ -1,8 +1,42 @@
 --------------------------------------------------------------------------------
 -- Modelo_GestionTransporte  |  DDL + poblamiento
 -- Motor.......: Oracle Database
--- Modelo......: 14 entidades 3ra normal
+-- Modelo......: 14 entidades en 3ra forma normal
+-- Reglas......: RN-01 a RN-10 (ver informe, seccion 2.4)
+--
+-- Estructura de este script:
+--   1. DROPS
+--   2. TABLAS con sus PK, FK, UK y CHECK
+--   3. INDICES que implementan reglas de negocio
+--   4. POBLAMIENTO de prueba
 
+
+--------------------------------------------------------------------------------
+-- TRAZABILIDAD CON LA DOCUMENTACION
+--
+--   Informe  : DP_Informe_Requerimiento.docx
+--                3.1 Datos que deben almacenarse -> seccion 2, las 14 tablas
+--                4.1 Modelo de datos             -> claves foraneas y compuestas
+--                4.2 Trazabilidad regla-mecanismo-> que regla implementa cada objeto
+--                2.4 Reglas de negocio           -> RN-01 a RN-10
+--   Anexo    : ANEXO_Tablas_de_Referencia.docx
+--                Tablas 10 a 23 - Diccionario de datos, una por entidad
+--                Tabla  24      - Relaciones entre entidades
+--                Tabla  25      - Claves foraneas compuestas de PASAJE
+--                Tabla   6      - Trazabilidad entre reglas y mecanismos
+--
+--   Reglas que este script garantiza por ESTRUCTURA, sin codigo:
+--     RN-01  capacidad del bus = filas en ASIENTO (PK compuesta)
+--     RN-02  origen distinto de destino en RUTA (FK + CHECK)
+--     RN-05  pasajero y viaje obligatorios en PASAJE
+--     RN-06  indice unico parcial ux_pasaje_asiento_vigente (seccion 3)
+--     RN-07  TARIFA por ruta, tipo de asiento y vigencia
+--     RN-08  catalogo ESTADO_PASAJE + PASAJE_ESTADO_HIST
+--     RN-09  el indice unico ignora los estados que no ocupan asiento
+--   Reglas que requieren PL/SQL (ver 02_Scripts/PLSQL/):
+--     RN-03, RN-04  no superposicion de conductor y de bus
+--     RN-10         jornada maxima de conduccion
+--------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
 -- 1. DROPS
@@ -306,19 +340,61 @@ CREATE TABLE pasaje_estado_hist (
     CONSTRAINT ck_hist_secuencia     CHECK       (secuencia > 0)
 );
 
+--------------------------------------------------------------------------------
+-- 3. INDICES QUE IMPLEMENTAN REGLAS DE NEGOCIO
+--------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
--- 3. POBLAMIENTO
+-- RN-06: un asiento no puede ser vendido dos veces para el mismo viaje.
+-- RN-09: la anulacion de un pasaje libera el asiento correspondiente.
+--
+-- Ambas reglas se resuelven con un unico indice, y conviene entender por que no
+-- basta un UNIQUE corriente. Un UNIQUE (id_viaje, id_bus, nro_asiento) impediria
+-- revender un asiento despues de anularlo, porque el pasaje anulado seguiria
+-- ocupando la clave. Se necesita que la unicidad aplique solo a los pasajes
+-- vigentes.
+--
+-- Oracle no ofrece indices unicos parciales como otros motores, pero un indice
+-- unico ignora las filas cuyas columnas indexadas son TODAS nulas. Ese es el
+-- mecanismo: las expresiones CASE devuelven el valor real cuando el estado ocupa
+-- el asiento (PEN=1, VEN=2, UTI=3) y NULL cuando no lo ocupa (ANU=4).
+--
+-- Consecuencia: al anular, el pasaje sale del indice y su asiento vuelve a estar
+-- disponible sin borrar el registro. Y al intentar vender un asiento ya tomado,
+-- el motor levanta DUP_VAL_ON_INDEX por si solo: la regla no se programa, se
+-- disena.
+--
+-- Limitacion asumida: los codigos de estado quedan fijos en la definicion del
+-- indice, porque un indice basado en funcion no puede consultar ESTADO_PASAJE.
+-- Es aceptable porque los cuatro estados son parte del enunciado del caso.
+--------------------------------------------------------------------------------
+CREATE UNIQUE INDEX ux_pasaje_asiento_vigente ON pasaje (
+    CASE WHEN id_estado IN (1,2,3) THEN id_viaje    END,
+    CASE WHEN id_estado IN (1,2,3) THEN id_bus      END,
+    CASE WHEN id_estado IN (1,2,3) THEN nro_asiento END
+);
+
+
+--------------------------------------------------------------------------------
+-- 4. POBLAMIENTO
+--
+-- Los datos reflejan el contexto de negocio declarado en el informe: una empresa
+-- que opera 7 rutas desde Santiago hacia Rancagua, Talca, Linares, Cauquenes,
+-- Chillan, Bulnes y Concepcion, con una flota de buses interurbanos.
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
 -- TERMINAL
+-- Santiago es el origen de las 7 rutas; los demas son los destinos del negocio.
 --------------------------------------------------------------------------------
-INSERT INTO terminal (id_terminal, nombre_terminal, ciudad, direccion) VALUES (1, 'Terminal Alameda',    'Santiago',    'Av. Libertador Bernardo O''Higgins 3750');
-INSERT INTO terminal (id_terminal, nombre_terminal, ciudad, direccion) VALUES (2, 'Terminal Rodoviario', 'La Serena',   'Av. El Santo 400');
-INSERT INTO terminal (id_terminal, nombre_terminal, ciudad, direccion) VALUES (3, 'Terminal Collao',     'Concepcion',  'Av. General Bonilla 1855');
-INSERT INTO terminal (id_terminal, nombre_terminal, ciudad, direccion) VALUES (4, 'Terminal Valparaiso', 'Valparaiso',  'Av. Pedro Montt 2800');
-INSERT INTO terminal (id_terminal, nombre_terminal, ciudad, direccion) VALUES (5, 'Terminal Rodoviario', 'Temuco',      'Vicente Perez Rosales 01609');
+INSERT INTO terminal (id_terminal, nombre_terminal, ciudad, direccion) VALUES (1, 'Terminal Alameda',   'Santiago',   'Av. Libertador Bernardo O''Higgins 3750');
+INSERT INTO terminal (id_terminal, nombre_terminal, ciudad, direccion) VALUES (2, 'Terminal Rancagua',  'Rancagua',   'Av. O''Carrol 1039');
+INSERT INTO terminal (id_terminal, nombre_terminal, ciudad, direccion) VALUES (3, 'Terminal Talca',     'Talca',      '12 Oriente 1055');
+INSERT INTO terminal (id_terminal, nombre_terminal, ciudad, direccion) VALUES (4, 'Terminal Linares',   'Linares',    'Av. Leon Bustos 200');
+INSERT INTO terminal (id_terminal, nombre_terminal, ciudad, direccion) VALUES (5, 'Terminal Cauquenes', 'Cauquenes',  'Claudina Urrutia 550');
+INSERT INTO terminal (id_terminal, nombre_terminal, ciudad, direccion) VALUES (6, 'Terminal Chillan',   'Chillan',    'Av. Brasil 560');
+INSERT INTO terminal (id_terminal, nombre_terminal, ciudad, direccion) VALUES (7, 'Terminal Bulnes',    'Bulnes',     'Av. Manuel Bulnes 320');
+INSERT INTO terminal (id_terminal, nombre_terminal, ciudad, direccion) VALUES (8, 'Terminal Collao',    'Concepcion', 'Av. General Bonilla 1855');
 
 --------------------------------------------------------------------------------
 -- TIPO_ASIENTO
@@ -338,13 +414,18 @@ INSERT INTO estado_pasaje (id_estado, codigo, nombre, ocupa_asiento) VALUES (4, 
 
 --------------------------------------------------------------------------------
 -- RUTA
+-- Las 7 rutas del negocio, todas con origen en Santiago (terminal 1).
+-- La duracion determina cuantos conductores exige RN-10 (maximo 5 h por conductor):
+--   solo Concepcion (6,5 h) supera el limite y obliga a llevar relevo.
+--   Bulnes (5,00 h) queda justo en el limite y se cubre con un solo conductor.
 --------------------------------------------------------------------------------
-INSERT INTO ruta (id_ruta, id_terminal_origen, id_terminal_destino, distancia_km, duracion_estimada_min) VALUES (1, 1, 2, 471, 390);
-INSERT INTO ruta (id_ruta, id_terminal_origen, id_terminal_destino, distancia_km, duracion_estimada_min) VALUES (2, 2, 1, 471, 390);
-INSERT INTO ruta (id_ruta, id_terminal_origen, id_terminal_destino, distancia_km, duracion_estimada_min) VALUES (3, 1, 3, 500, 420);
-INSERT INTO ruta (id_ruta, id_terminal_origen, id_terminal_destino, distancia_km, duracion_estimada_min) VALUES (4, 3, 1, 500, 420);
-INSERT INTO ruta (id_ruta, id_terminal_origen, id_terminal_destino, distancia_km, duracion_estimada_min) VALUES (5, 1, 5, 675, 540);
-INSERT INTO ruta (id_ruta, id_terminal_origen, id_terminal_destino, distancia_km, duracion_estimada_min) VALUES (6, 1, 4, 120, 105);
+INSERT INTO ruta (id_ruta, id_terminal_origen, id_terminal_destino, distancia_km, duracion_estimada_min) VALUES (1, 1, 2,  87,  75);
+INSERT INTO ruta (id_ruta, id_terminal_origen, id_terminal_destino, distancia_km, duracion_estimada_min) VALUES (2, 1, 3, 255, 180);
+INSERT INTO ruta (id_ruta, id_terminal_origen, id_terminal_destino, distancia_km, duracion_estimada_min) VALUES (3, 1, 4, 305, 210);
+INSERT INTO ruta (id_ruta, id_terminal_origen, id_terminal_destino, distancia_km, duracion_estimada_min) VALUES (4, 1, 5, 360, 270);
+INSERT INTO ruta (id_ruta, id_terminal_origen, id_terminal_destino, distancia_km, duracion_estimada_min) VALUES (5, 1, 6, 400, 285);
+INSERT INTO ruta (id_ruta, id_terminal_origen, id_terminal_destino, distancia_km, duracion_estimada_min) VALUES (6, 1, 7, 425, 300);
+INSERT INTO ruta (id_ruta, id_terminal_origen, id_terminal_destino, distancia_km, duracion_estimada_min) VALUES (7, 1, 8, 500, 390);
 
 --------------------------------------------------------------------------------
 -- BUS
@@ -356,14 +437,12 @@ INSERT INTO bus (id_bus, patente, modelo, anio_fabricacion, fecha_compra) VALUES
 --------------------------------------------------------------------------------
 -- ASIENTO
 -- Bus 1: 12 asientos | Bus 2: 10 asientos | Bus 3: 10 asientos
--- La capacidad de cada bus es exactamente esta cantidad de filas.
+-- La capacidad de cada bus es exactamente esta cantidad de filas (RN-01).
 --------------------------------------------------------------------------------
--- Bus 1 - piso 1 salon cama
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1,  1, 2, 1);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1,  2, 2, 1);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1,  3, 2, 1);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1,  4, 2, 1);
--- Bus 1 - piso 2 semi cama
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1,  5, 1, 2);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1,  6, 1, 2);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1,  7, 1, 2);
@@ -372,24 +451,20 @@ INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1,  9, 
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1, 10, 1, 2);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1, 11, 1, 2);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (1, 12, 1, 2);
--- Bus 2 - piso 1 salon cama
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2,  1, 2, 1);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2,  2, 2, 1);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2,  3, 2, 1);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2,  4, 2, 1);
--- Bus 2 - piso 2 semi cama
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2,  5, 1, 2);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2,  6, 1, 2);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2,  7, 1, 2);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2,  8, 1, 2);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2,  9, 1, 2);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (2, 10, 1, 2);
--- Bus 3 - piso 1 premium + salon cama
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (3,  1, 3, 1);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (3,  2, 3, 1);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (3,  3, 2, 1);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (3,  4, 2, 1);
--- Bus 3 - piso 2 semi cama
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (3,  5, 1, 2);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (3,  6, 1, 2);
 INSERT INTO asiento (id_bus, nro_asiento, id_tipo_asiento, piso) VALUES (3,  7, 1, 2);
@@ -407,58 +482,64 @@ INSERT INTO conductor (id_conductor, run, dv, pnombre, snombre, papellido, sapel
 
 --------------------------------------------------------------------------------
 -- VIAJE
--- El bus 1 hace tres viajes distintos (1, 2 y 6): eso es lo que la relacion
--- 1:1 del modelo original hacia imposible.
--- Ninguna asignacion de bus se superpone en el tiempo.
+-- El bus 1 realiza tres viajes distintos (1, 2 y 6): eso es lo que la relacion
+-- 1:1 del modelo original hacia imposible. Ninguna asignacion de bus se superpone.
 --------------------------------------------------------------------------------
-INSERT INTO viaje (id_viaje, id_ruta, id_bus, salida_prog, llegada_prog, estado_viaje) VALUES (1, 1, 1, TIMESTAMP '2026-09-01 08:00:00', TIMESTAMP '2026-09-01 14:30:00', 'FIN');
-INSERT INTO viaje (id_viaje, id_ruta, id_bus, salida_prog, llegada_prog, estado_viaje) VALUES (2, 2, 1, TIMESTAMP '2026-09-01 22:00:00', TIMESTAMP '2026-09-02 04:30:00', 'FIN');
-INSERT INTO viaje (id_viaje, id_ruta, id_bus, salida_prog, llegada_prog, estado_viaje) VALUES (3, 3, 2, TIMESTAMP '2026-09-01 09:00:00', TIMESTAMP '2026-09-01 16:00:00', 'FIN');
-INSERT INTO viaje (id_viaje, id_ruta, id_bus, salida_prog, llegada_prog, estado_viaje) VALUES (4, 5, 3, TIMESTAMP '2026-09-02 21:00:00', TIMESTAMP '2026-09-03 06:00:00', 'PRO');
-INSERT INTO viaje (id_viaje, id_ruta, id_bus, salida_prog, llegada_prog, estado_viaje) VALUES (5, 6, 2, TIMESTAMP '2026-09-02 07:30:00', TIMESTAMP '2026-09-02 09:15:00', 'PRO');
-INSERT INTO viaje (id_viaje, id_ruta, id_bus, salida_prog, llegada_prog, estado_viaje) VALUES (6, 1, 1, TIMESTAMP '2026-09-03 08:00:00', TIMESTAMP '2026-09-03 14:30:00', 'PRO');
+INSERT INTO viaje (id_viaje, id_ruta, id_bus, salida_prog, llegada_prog, estado_viaje) VALUES (1, 7, 1, TIMESTAMP '2026-09-01 08:00:00', TIMESTAMP '2026-09-01 14:30:00', 'FIN');
+INSERT INTO viaje (id_viaje, id_ruta, id_bus, salida_prog, llegada_prog, estado_viaje) VALUES (2, 1, 1, TIMESTAMP '2026-09-01 18:00:00', TIMESTAMP '2026-09-01 19:15:00', 'FIN');
+INSERT INTO viaje (id_viaje, id_ruta, id_bus, salida_prog, llegada_prog, estado_viaje) VALUES (3, 5, 2, TIMESTAMP '2026-09-01 09:00:00', TIMESTAMP '2026-09-01 13:45:00', 'FIN');
+INSERT INTO viaje (id_viaje, id_ruta, id_bus, salida_prog, llegada_prog, estado_viaje) VALUES (4, 6, 3, TIMESTAMP '2026-09-02 21:00:00', TIMESTAMP '2026-09-03 02:00:00', 'PRO');
+INSERT INTO viaje (id_viaje, id_ruta, id_bus, salida_prog, llegada_prog, estado_viaje) VALUES (5, 2, 2, TIMESTAMP '2026-09-02 07:30:00', TIMESTAMP '2026-09-02 10:30:00', 'PRO');
+INSERT INTO viaje (id_viaje, id_ruta, id_bus, salida_prog, llegada_prog, estado_viaje) VALUES (6, 7, 1, TIMESTAMP '2026-09-03 08:00:00', TIMESTAMP '2026-09-03 14:30:00', 'PRO');
 
 --------------------------------------------------------------------------------
 -- VIAJE_CONDUCTOR
+-- RN-10: por ley un conductor no puede superar 5 horas de conduccion.
+-- Los viajes 1 y 6 (Concepcion, 6,5 h) llevan relevo; el resto no lo requiere.
 -- Ningun conductor queda asignado a dos viajes que se superpongan.
 --------------------------------------------------------------------------------
 INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (1, 1, 'TIT');
 INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (1, 2, 'REL');
-INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (2, 1, 'TIT');
-INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (2, 2, 'REL');
-INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (3, 3, 'TIT');
-INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (4, 3, 'TIT');
-INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (4, 4, 'REL');
-INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (5, 4, 'TIT');
+INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (2, 3, 'TIT');
+INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (3, 4, 'TIT');
+INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (4, 4, 'TIT');
+INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (5, 1, 'TIT');
 INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (6, 2, 'TIT');
+INSERT INTO viaje_conductor (id_viaje, id_conductor, rol) VALUES (6, 3, 'REL');
 
 --------------------------------------------------------------------------------
 -- PASAJERO
 --------------------------------------------------------------------------------
-INSERT INTO pasajero (id_pasajero, run, dv, pnombre, snombre, papellido, sapellido, mail, telefono) VALUES (1, 11222333, '4', 'Camila',    'Andrea',  'Torres',  'Lagos',   'camila.torres@correo.cl',   '+56911111111');
-INSERT INTO pasajero (id_pasajero, run, dv, pnombre, snombre, papellido, sapellido, mail, telefono) VALUES (2, 13444555, '6', 'Rodrigo',   'Esteban', 'Munoz',   'Diaz',    'rmunoz@correo.cl',          '+56922222222');
-INSERT INTO pasajero (id_pasajero, run, dv, pnombre, snombre, papellido, sapellido, mail, telefono) VALUES (3, 16555777, 'K', 'Valentina', 'Paz',     'Herrera', 'Nunez',   'vherrera@correo.cl',        '+56933333333');
-INSERT INTO pasajero (id_pasajero, run, dv, pnombre, snombre, papellido, sapellido, mail, telefono) VALUES (4, 10111222, '3', 'Sebastian', NULL,      'Castro',  'Rivas',   'scastro@correo.cl',         '+56944444444');
-INSERT INTO pasajero (id_pasajero, run, dv, pnombre, snombre, papellido, sapellido, mail, telefono) VALUES (5, 18999000, '1', 'Francisca', 'Belen',   'Alvarez', 'Soto',    'falvarez@correo.cl',        NULL);
-INSERT INTO pasajero (id_pasajero, run, dv, pnombre, snombre, papellido, sapellido, mail, telefono) VALUES (6, 14333222, '8', 'Matias',    'Alonso',  'Vega',    'Fuentes', 'mvega@correo.cl',           '+56966666666');
+INSERT INTO pasajero (id_pasajero, run, dv, pnombre, snombre, papellido, sapellido, mail, telefono) VALUES (1, 11222333, '4', 'Camila',    'Andrea',  'Torres',  'Lagos',   'camila.torres@correo.cl', '+56911111111');
+INSERT INTO pasajero (id_pasajero, run, dv, pnombre, snombre, papellido, sapellido, mail, telefono) VALUES (2, 13444555, '6', 'Rodrigo',   'Esteban', 'Munoz',   'Diaz',    'rmunoz@correo.cl',        '+56922222222');
+INSERT INTO pasajero (id_pasajero, run, dv, pnombre, snombre, papellido, sapellido, mail, telefono) VALUES (3, 16555777, 'K', 'Valentina', 'Paz',     'Herrera', 'Nunez',   'vherrera@correo.cl',      '+56933333333');
+INSERT INTO pasajero (id_pasajero, run, dv, pnombre, snombre, papellido, sapellido, mail, telefono) VALUES (4, 10111222, '3', 'Sebastian', NULL,      'Castro',  'Rivas',   'scastro@correo.cl',       '+56944444444');
+INSERT INTO pasajero (id_pasajero, run, dv, pnombre, snombre, papellido, sapellido, mail, telefono) VALUES (5, 18999000, '1', 'Francisca', 'Belen',   'Alvarez', 'Soto',    'falvarez@correo.cl',      NULL);
+INSERT INTO pasajero (id_pasajero, run, dv, pnombre, snombre, papellido, sapellido, mail, telefono) VALUES (6, 14333222, '8', 'Matias',    'Alonso',  'Vega',    'Fuentes', 'mvega@correo.cl',         '+56966666666');
 
 --------------------------------------------------------------------------------
 -- TARIFA
--- La tarifa 11 esta cerrada (vigencia_hasta) y convive con la 1, que la
--- reemplazo para la misma ruta y tipo de asiento: precio por condicion
--- comercial sin sobrescribir el historico.
+-- Precio por ruta y tipo de asiento. La tarifa 17 esta cerrada y convive con la
+-- 14, que la reemplazo para la misma ruta y tipo: es la variacion por condicion
+-- comercial que exige RN-07, sin sobrescribir el historico.
 --------------------------------------------------------------------------------
-INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 1, 1, 1, DATE '2026-01-01', NULL, 18900);
-INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 2, 1, 2, DATE '2026-01-01', NULL, 27500);
-INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 3, 2, 1, DATE '2026-01-01', NULL, 18900);
-INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 4, 2, 2, DATE '2026-01-01', NULL, 27500);
-INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 5, 3, 1, DATE '2026-01-01', NULL, 21000);
-INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 6, 3, 2, DATE '2026-01-01', NULL, 31000);
-INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 7, 5, 1, DATE '2026-01-01', NULL, 26500);
-INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 8, 5, 2, DATE '2026-01-01', NULL, 39900);
-INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 9, 5, 3, DATE '2026-01-01', NULL, 52000);
-INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES (10, 6, 1, DATE '2026-01-01', NULL,  4500);
-INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES (11, 1, 1, DATE '2025-06-01', DATE '2025-12-31', 16500);
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 1, 1, 1, DATE '2026-01-01', NULL,  3500);
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 2, 1, 2, DATE '2026-01-01', NULL,  5200);
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 3, 2, 1, DATE '2026-01-01', NULL,  9500);
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 4, 2, 2, DATE '2026-01-01', NULL, 14000);
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 5, 3, 1, DATE '2026-01-01', NULL, 11000);
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 6, 3, 2, DATE '2026-01-01', NULL, 16500);
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 7, 4, 1, DATE '2026-01-01', NULL, 12500);
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 8, 4, 2, DATE '2026-01-01', NULL, 18500);
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES ( 9, 5, 1, DATE '2026-01-01', NULL, 14000);
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES (10, 5, 2, DATE '2026-01-01', NULL, 21000);
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES (11, 6, 1, DATE '2026-01-01', NULL, 15000);
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES (12, 6, 2, DATE '2026-01-01', NULL, 22500);
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES (13, 6, 3, DATE '2026-01-01', NULL, 30000);
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES (14, 7, 1, DATE '2026-01-01', NULL, 18000);
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES (15, 7, 2, DATE '2026-01-01', NULL, 27000);
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES (16, 7, 3, DATE '2026-01-01', NULL, 36000);
+INSERT INTO tarifa (id_tarifa, id_ruta, id_tipo_asiento, vigencia_desde, vigencia_hasta, precio) VALUES (17, 7, 1, DATE '2025-06-01', DATE '2025-12-31', 16000);
 
 --------------------------------------------------------------------------------
 -- VENTA
@@ -477,14 +558,14 @@ INSERT INTO venta (id_venta, id_pasajero_comprador, fecha_hora, canal, medio_pag
 --     asiento 7): la anulacion libero el asiento sin borrar la evidencia.
 --   * Los cuatro estados aparecen representados.
 --------------------------------------------------------------------------------
-INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (1, 1, 1, 1,  3, 1,  2, 27500,    0, 3, TIMESTAMP '2026-08-20 10:15:00');
-INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (2, 1, 1, 1,  4, 2,  2, 27500, 2750, 3, TIMESTAMP '2026-08-20 10:15:00');
-INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (3, 2, 4, 3,  1, 4,  9, 52000,    0, 2, TIMESTAMP '2026-08-22 16:40:00');
-INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (4, 2, 4, 3,  2, 5,  9, 52000, 5200, 2, TIMESTAMP '2026-08-22 16:40:00');
-INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (5, 2, 4, 3,  6, 6,  7, 26500,    0, 2, TIMESTAMP '2026-08-22 16:40:00');
-INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (6, 3, 3, 2,  7, 3,  5, 21000,    0, 4, TIMESTAMP '2026-08-25 09:05:00');
-INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (7, 4, 3, 2,  7, 6,  5, 21000,    0, 2, TIMESTAMP '2026-08-26 18:20:00');
-INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (8, 4, 5, 2,  5, 6, 10,  4500,    0, 1, TIMESTAMP '2026-08-26 18:20:00');
+INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (1, 1, 1, 1,  3, 1, 15, 27000,    0, 3, TIMESTAMP '2026-08-20 10:15:00');
+INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (2, 1, 1, 1,  4, 2, 15, 27000, 2700, 3, TIMESTAMP '2026-08-20 10:15:00');
+INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (3, 2, 4, 3,  1, 4, 13, 30000,    0, 2, TIMESTAMP '2026-08-22 16:40:00');
+INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (4, 2, 4, 3,  2, 5, 13, 30000, 3000, 2, TIMESTAMP '2026-08-22 16:40:00');
+INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (5, 2, 4, 3,  6, 6, 11, 15000,    0, 2, TIMESTAMP '2026-08-22 16:40:00');
+INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (6, 3, 3, 2,  7, 3,  9, 14000,    0, 4, TIMESTAMP '2026-08-25 09:05:00');
+INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (7, 4, 3, 2,  7, 6,  9, 14000,    0, 2, TIMESTAMP '2026-08-26 18:20:00');
+INSERT INTO pasaje (id_pasaje, id_venta, id_viaje, id_bus, nro_asiento, id_pasajero, id_tarifa, precio_aplicado, descuento, id_estado, fecha_emision) VALUES (8, 4, 5, 2,  5, 6,  3,  9500,    0, 1, TIMESTAMP '2026-08-26 18:20:00');
 
 --------------------------------------------------------------------------------
 -- PASAJE_ESTADO_HIST
