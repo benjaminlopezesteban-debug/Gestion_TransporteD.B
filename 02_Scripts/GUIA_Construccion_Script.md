@@ -1,10 +1,16 @@
 # Guía de construcción del script
 
-**Sistema de Gestión de Transporte Interurbano** · BDY1103 · Actualizada 06-sep-2026
+**Sistema de Gestión de Transporte Interurbano** · BDY1103 · Actualizada 07-sep-2026
 
 Este documento explica **cómo está construido el script y por qué en ese orden**, para
 que alguien que llega de fuera pueda seguir el desarrollo, entender las decisiones de
 diseño y continuar donde quedó.
+
+> **Corrección estructural del 07-sep-2026.** El script dejó de ser una colección de
+> bloques anónimos. Toda la lógica vive ahora en **tres packages y dos triggers**; los
+> bloques anónimos se conservan, pero en su rol correcto: código que *invoca* a los
+> objetos almacenados, más las demostraciones de `RECORD` y `VARRAY` que la pauta pide en
+> esa forma. Las §2 y §3 explican qué cambió y qué se ganó.
 
 ---
 
@@ -12,16 +18,29 @@ diseño y continuar donde quedó.
 
 ```
 02_Scripts/
-├── DDL/Modelo_GestionTransporte_DDL.sql     1. tablas, índice y datos de prueba
-├── PLSQL/01_Record_Varray.sql               2. tipos compuestos
-├── PLSQL/02_Calculos.sql                    3. nivel 1
-├── PLSQL/03_Consultas_Cursores.sql          4. nivel 2
-└── PLSQL/04_Operaciones.sql                 5. nivel 3  ← pendiente
+├── DDL/Modelo_GestionTransporte_DDL.sql   1. tablas, índice único parcial y datos
+├── PLSQL/01_Pkg_Calculos.sql              2. funciones: resuelven UN valor
+├── PLSQL/02_Pkg_Consultas.sql             3. procedimientos: recorren y presentan
+├── PLSQL/03_Pkg_Operaciones.sql           4. procedimientos: validan y escriben
+├── PLSQL/04_Triggers.sql                  5. integridad y auditoría por evento
+└── PLSQL/05_Demostraciones.sql            6. bloques anónimos que invocan todo
 ```
 
-El DDL es destructivo: hace `DROP` de las catorce tablas antes de crearlas. En la
-primera ejecución sobre un esquema vacío lanza `ORA-00942` en cada `DROP`, lo cual es
-esperado. Todo lo demás es idempotente salvo el nivel 3, que escribe.
+**El número del archivo es el orden real de ejecución, no una sugerencia.** Cada uno
+depende de que el anterior exista:
+
+- `02_Pkg_Consultas` invoca `pkg_calculos.fn_conductores_requeridos` y
+  `fn_porcentaje_ocupacion` dentro del cuerpo de sus cursores. Sin el package de
+  cálculos creado, no compila.
+- `03_Pkg_Operaciones` invoca `fn_tarifa_vigente` y `fn_asiento_ocupado`.
+- `04_Triggers` va antes que las demostraciones porque estas provocan el evento que el
+  trigger audita.
+- `05_Demostraciones` depende de los tres packages y de los dos triggers.
+
+El DDL es destructivo: hace `DROP` de las catorce tablas antes de crearlas. En la primera
+ejecución sobre un esquema vacío lanza `ORA-00942` en cada `DROP`, lo cual es esperado.
+Los cinco archivos PL/SQL son idempotentes: se pueden reejecutar cuantas veces se quiera.
+Los bloques de `05_Demostraciones.sql` que escriben terminan siempre en `ROLLBACK`.
 
 Conexión: `benja@//localhost:1521/FREEPDB1` sobre el contenedor `oracle-practica`.
 
@@ -30,65 +49,85 @@ Conexión: `benja@//localhost:1521/FREEPDB1` sobre el contenedor `oracle-practic
 ## 2. La idea central: tres niveles por dependencia de datos
 
 **Los niveles no ordenan por dificultad. Ordenan por quién necesita el resultado de
-quién.**
+quién.** Cada nivel es hoy un package:
 
-| Nivel | Qué hace | Envase que tendrá | Archivo |
+| Nivel | Qué hace | Envase | Archivo |
 |---|---|---|---|
-| 1 | Resuelve **un valor** | Función | `02_Calculos.sql` |
-| 2 | Recorre y **presenta** un conjunto | Procedimiento | `03_Consultas_Cursores.sql` |
-| 3 | Valida y **escribe** | Procedimiento | `04_Operaciones.sql` |
+| 1 | Resuelve **un valor** | `pkg_calculos` — 5 funciones públicas + 1 privada | `01_Pkg_Calculos.sql` |
+| 2 | Recorre y **presenta** un conjunto | `pkg_consultas` — 3 procedimientos | `02_Pkg_Consultas.sql` |
+| 3 | Valida y **escribe** | `pkg_operaciones` — 3 procedimientos, tipos y excepciones | `03_Pkg_Operaciones.sql` |
 
 El nivel 1 no depende de nadie y todos dependen de él: la venta necesita el precio
 vigente, la programación necesita saber cuántos conductores exige el viaje, la
-disponibilidad necesita contar asientos libres.
+disponibilidad necesita saber si un asiento está libre.
 
-**Por qué importa el orden.** Si se escribe primero la venta con la búsqueda de tarifa
-incrustada, cuando esa búsqueda deba convertirse en `fn_tarifa_vigente` hay que abrir y
-reescribir el bloque de venta. Construir de abajo hacia arriba evita ese retroceso.
+**Por qué importaba el orden, con un ejemplo real y no hipotético.** El RECORD del pasaje
+se escribió primero con su propia consulta de tarifa vigente, independiente de la que
+después se volvió `fn_tarifa_vigente`. Eran la misma regla escrita dos veces: si la
+vigencia cambiara, había que corregirla en dos lugares, y sólo se detectó al revisar el
+script con detalle. Construir de abajo hacia arriba es lo que evita que ese tipo de
+duplicación pase inadvertida —ver §8—.
 
 ---
 
-## 3. La convención que evita reescribir: frontera del objeto futuro
+## 3. Qué aporta el package, más allá de ordenar el código
 
-En esta entrega (RA1) todo son **bloques anónimos**. Los procedimientos, funciones y
-packages corresponden al RA2. Para que el paso de una cosa a la otra sea mecánico, cada
-bloque se escribe ya con la forma que tendrá:
+Agrupar procedimientos en un package suele presentarse como una cuestión de orden. En
+este proyecto resuelve **tres problemas concretos** que sin él no tienen solución:
+
+**1. Los tipos compuestos se vuelven compartibles.** Un `TYPE ... IS RECORD` declarado en
+un bloque anónimo muere con el bloque. Aunque otro bloque declarara un tipo con
+exactamente los mismos campos, Oracle los trata como tipos distintos y no permite pasar
+uno donde se espera el otro. Declarado en la especificación de `pkg_operaciones`,
+`tv_solicitudes` **cruza la frontera**: el bloque anónimo llena la colección y se la pasa
+al procedimiento como parámetro. Esa es la diferencia entre demostrar un VARRAY y
+usarlo.
+
+**2. Las excepciones de usuario se vuelven parte de la interfaz.** Una `EXCEPTION`
+declarada dentro de un bloque anónimo tampoco existe fuera de él: quien lo invocara sólo
+podía capturar `OTHERS` y leer el texto del mensaje para adivinar qué pasó. Las ocho
+excepciones de `pkg_operaciones` están en la especificación, de modo que el invocador
+escribe:
 
 ```sql
---------------------------------------------------------------------
--- 1.1  Tarifa vigente  ->  futura FUNCTION fn_tarifa_vigente
--- Entradas : p_id_ruta, p_id_tipo_asiento, p_fecha
--- Devuelve : precio vigente
--- Sirve a  : RF-01      Implementa : RN-07
---------------------------------------------------------------------
-DECLARE
-    -- PARAMETROS de la futura funcion
-    p_id_ruta  CONSTANT ruta.id_ruta%TYPE := 7;
-    ...
-    -- RETORNO
-    v_precio  tarifa.precio%TYPE;
-BEGIN
-    ...                          -- el cuerpo no cambia al extraerse
 EXCEPTION
-    ...
-END;
-/
+    WHEN pkg_operaciones.e_asiento_no_disponible THEN ...
+    WHEN pkg_operaciones.e_fuera_de_plazo        THEN ...
 ```
 
-Tres reglas:
+Cada error se distingue por nombre y se maneja distinto. Sin package eso es imposible.
 
-1. **Las entradas van como `CONSTANT` con prefijo `p_`** al inicio del `DECLARE`. Al
-   convertirlo en función, esas líneas pasan a la firma y desaparecen del cuerpo.
-2. **El resultado se deposita en una sola variable.** Al extraer, se cambia el
-   `DBMS_OUTPUT` final por un `RETURN`.
-3. **El cuerpo entre `BEGIN` y `EXCEPTION` no se toca** en la conversión.
-
-Prefijos usados en todo el script: `p_` parámetro, `v_` variable, `c_` constante o
-cursor, `r_` record, `tr_` tipo record, `tv_` tipo varray, `e_` excepción de usuario.
+**3. Aparece la distinción público / privado.** `pkg_calculos` tiene una sexta función,
+`fn_ocupados_viaje`, que existe **sólo en el cuerpo**: no está en la especificación y
+nadie fuera del package puede llamarla. Cuenta los asientos ocupados de un viaje, que es
+lo que `fn_asientos_disponibles` y `fn_porcentaje_ocupacion` necesitaban ambas. Es
+simultáneamente la eliminación de una duplicación real y la demostración del constructor
+privado que pide el indicador IL2.2.
 
 ---
 
-## 4. Reglas de orden que no son de estilo
+## 4. Dónde viven los RECORD y los VARRAY
+
+Están en **tres lugares distintos**, y la diferencia entre ellos es deliberada:
+
+| Dónde | Qué | Alcance |
+|---|---|---|
+| Especificación de `pkg_operaciones` | `tr_solicitud`, `tv_solicitudes`, `tv_conductores` | Almacenado en el diccionario. Cualquier programa lo usa. |
+| `DECLARE` de `05_Demostraciones.sql` | `tr_pasaje`, `tv_asientos` | Local. Muere con el bloque. |
+| Implícitos | `ruta%ROWTYPE`, `c_viajes_programados%ROWTYPE` | Los construye Oracle desde la tabla o el cursor. |
+
+**Por qué se conservan los dos primeros.** Los locales muestran `RECORD` y `VARRAY` en su
+forma pura, que es lo que pide RA1, y de paso dejan ver la limitación que el package
+resuelve. Los almacenados muestran esa misma estructura ya compartible. El contraste
+entre ambos *es* el argumento de la §3, y por eso conviene presentarlos juntos.
+
+`%ROWTYPE` se usa cuando se necesita la fila completa tal como está en la base o tal como
+la devuelve un cursor. Un `RECORD` explícito se declara cuando la estructura combina
+campos de varias tablas o incluye datos calculados que no existen como columna.
+
+---
+
+## 5. Reglas de orden que no son de estilo
 
 **Dentro del `DECLARE` el orden es obligatorio:**
 
@@ -100,114 +139,170 @@ Una variable declarada como `mi_cursor%ROWTYPE` exige que el cursor ya exista, y
 cursor que devuelva un tipo `RECORD` propio exige que el tipo esté declarado antes.
 Invertirlo no compila.
 
-**Las excepciones se escriben desde el primer bloque, no al final.** Agregar el manejo
-de errores después obliga a reestructurar todos los bloques ya escritos.
+**En la especificación del package el orden es el mismo**, y por la misma razón:
+`tv_solicitudes IS VARRAY(6) OF tr_solicitud` exige que `tr_solicitud` esté declarado
+arriba.
 
-**Los tipos `RECORD` y `VARRAY` se definen una sola vez, en su forma final.** Están en
-`01_Record_Varray.sql`. Los bloques posteriores los repiten literalmente hasta que en
-RA2 migren a la especificación del package.
+**Las excepciones se escriben desde el primer bloque, no al final.** Agregar el manejo de
+errores después obliga a reestructurar todo lo ya escrito.
 
 **Una función invocada dentro de la consulta de un cursor debe existir antes de que el
 cursor compile.** Es otra razón técnica para el orden abajo-arriba.
 
----
+**Los métodos de colección no se pueden usar dentro de una sentencia SQL.**
+`p_solicitudes.COUNT` en un `WHERE` produce `ORA-00904`; hay que pasarlo por una variable
+PL/SQL primero. Es un error que aparece tarde, al compilar.
 
-## 5. La decisión pendiente que condiciona el nivel 3
-
-**Antes de escribir `04_Operaciones.sql` hay que decidir quién escribe el historial de
-estados del pasaje.**
-
-Los procedimientos se invocan; **un trigger no**: se dispara solo ante un `INSERT`,
-`UPDATE` o `DELETE`. Eso significa que un trigger creado sobre `PASAJE` cambia el
-comportamiento de todo lo que se escriba después, sin que el código lo mencione.
-
-El caso concreto: el candidato natural es un trigger que registre en
-`PASAJE_ESTADO_HIST` cada cambio de estado.
-
-| Si el trigger existe | Si no existe |
-|---|---|
-| `sp_vender_pasaje` **no debe** insertar el historial | `sp_vender_pasaje` **sí debe** hacerlo |
-
-Escribir primero la venta insertando el historial a mano y agregar el trigger después
-produce **dos filas por transición**. Al revés, quitar la inserción manual confiando en
-un trigger que aún no existe **pierde el historial en silencio**.
-
-**Estado actual:** no decidido. Mientras tanto, el nivel 3 debe escribir el historial
-explícitamente y dejarlo marcado en un comentario de cabecera:
-
-```sql
--- El historial lo escribe este procedimiento. Cuando se incorpore el trigger
--- de auditoria sobre PASAJE, esta insercion se elimina de aqui.
-```
-
-Eso basta para que la migración posterior sea localizable y no una cacería.
+**Prefijos usados en todo el script:** `p_` parámetro, `v_` variable, `c_` constante o
+cursor, `r_` record, `tr_` tipo record, `tv_` tipo varray, `e_` excepción de usuario,
+`fn_` función, `sp_` procedimiento, `trg_` trigger, `pkg_` package.
 
 ---
 
-## 6. Qué hay escrito hoy
+## 6. Quién escribe el historial: el trigger
 
-### `01_Record_Varray.sql` — tipos compuestos
+**Decidido el 06-sep-2026: lo escribe `trg_pasaje_historial`, no los procedimientos.**
 
-| Bloque | Contenido |
-|---|---|
-| 2.1 | `RECORD` explícito del pasaje, campos anclados con `%TYPE` |
-| 2.2 | `RECORD` anclado con `%ROWTYPE` y cuándo conviene cada forma |
-| 2.3 | `VARRAY(6)` de asientos solicitados |
-| 2.4 | Ambos trabajando juntos: simulación de una venta |
+El historial debe registrarse siempre que un pasaje cambie, sin importar quién lo
+modifique. Si la inserción viviera dentro de cada procedimiento, bastaría un `UPDATE`
+manual desde SQL\*Plus, una carga masiva o un procedimiento nuevo que alguien olvide
+instrumentar para que la transición se pierda en silencio. El trigger se dispara por el
+**evento**, no por la llamada, de modo que la trazabilidad no depende de la disciplina de
+quien escribe el código.
 
-**Por qué VARRAY y no tabla anidada:** la cantidad de asientos de una venta tiene un
-límite conocido —la política comercial fija 6 por transacción— y el `VARRAY` declara ese
-límite en el tipo. La restricción del negocio queda expresada en la estructura de datos
-en vez de depender de una validación que alguien pueda omitir. Si el conjunto pudiera
-crecer sin cota, la tabla anidada sería lo correcto.
+Es el mismo criterio con que RN-06 se resolvió en un índice único y no en una validación:
+la regla se cumple aunque el dato entre por otra vía.
 
-**Trampa encontrada:** un campo del `RECORD` no puede llamarse igual que una tabla. Al
-nombrarlo `tipo_asiento`, PL/SQL resuelve el identificador contra el campo que está
-declarando y falla con `PLS-00320`. Se renombró a `nombre_tipo`.
+**Consecuencia obligatoria:** ningún procedimiento de `pkg_operaciones` inserta en
+`PASAJE_ESTADO_HIST`. Si lo hiciera, cada transición quedaría registrada dos veces.
 
-### `02_Calculos.sql` — nivel 1
+**Un trigger no recibe parámetros**, y eso plantea un problema real con el motivo de la
+anulación, que sólo conoce quien ejecuta la operación. Se resuelve por el contexto de la
+sesión: el procedimiento lo declara con `DBMS_APPLICATION_INFO.SET_CLIENT_INFO` antes del
+`UPDATE` y el trigger lo lee con `SYS_CONTEXT`. No es una variable global del programa
+sino un dato de sesión, que Oracle mantiene aislado entre sesiones concurrentes.
+`sp_anular_pasaje` lo limpia en su manejador `WHEN OTHERS` antes de relanzar, para que el
+motivo de una anulación fallida no se filtre a la transición siguiente.
 
-| Bloque | Futura función | Excepciones |
+**Guarda contra registros falsos:** el trigger ignora los `UPDATE` que no alteran el
+estado. Sin ella, corregir un precio generaría una fila de historial que no corresponde a
+ninguna transición.
+
+**El segundo trigger, `trg_pasaje_no_revive`,** impide que un pasaje anulado vuelva a
+cualquier otro estado (RN-08). Usa la cláusula `WHEN` para no ejecutar cuerpo alguno en
+las transiciones que sí son válidas: el filtro está en la definición del trigger, no en
+un `IF` dentro de él.
+
+**Orden y recarga:** el poblamiento del DDL inserta el historial a mano, y es correcto
+porque en ese momento el trigger no existe. Al recargar el DDL, el `DROP TABLE` de
+`PASAJE` elimina ambos triggers junto con la tabla, de modo que la secuencia
+DDL → triggers → operaciones siempre queda consistente.
+
+---
+
+## 7. Qué hay escrito hoy
+
+### `01_Pkg_Calculos.sql` — nivel 1
+
+Cinco funciones públicas y una privada. Ninguna captura sus propias excepciones: las deja
+propagar para que el invocador decida qué hacer.
+
+| Función | Devuelve | Excepción que puede propagar |
 |---|---|---|
-| 1.1 | `fn_tarifa_vigente` | `NO_DATA_FOUND`, `TOO_MANY_ROWS` |
-| 1.2 | `fn_conductores_requeridos` | `NO_DATA_FOUND` |
-| 1.3 | `fn_asientos_disponibles` | `NO_DATA_FOUND` |
-| 1.4 | `fn_porcentaje_ocupacion` | `ZERO_DIVIDE`, `NO_DATA_FOUND` |
+| `fn_tarifa_vigente(ruta, tipo_asiento, fecha)` | `id_tarifa` vigente | `NO_DATA_FOUND` |
+| `fn_conductores_requeridos(viaje)` | 1 ó 2 según RN-10 | `NO_DATA_FOUND` |
+| `fn_asientos_disponibles(viaje)` | asientos libres | `NO_DATA_FOUND` |
+| `fn_porcentaje_ocupacion(viaje)` | % ocupación | `ZERO_DIVIDE` |
+| `fn_asiento_ocupado(viaje, bus, asiento)` | `'S'` / `'N'` | — |
+| `fn_ocupados_viaje(viaje)` *(privada)* | asientos ocupados | — |
 
-Cierra con un bloque que **fuerza las excepciones** con entradas inválidas, para
-demostrar que el manejo de errores funciona y no sólo está escrito.
+Constante pública `c_max_horas_conduccion := 5`, que es RN-10 expresada una sola vez.
 
-**Aquí sólo hay excepciones predefinidas, y es deliberado.** En este nivel los errores
-posibles son los que el motor detecta solo: no hay dato, hay más de uno, se divide por
-cero. Declarar una excepción propia donde `NO_DATA_FOUND` ya describe la situación sería
-usarla por cumplir un requisito formal. Las de usuario corresponden al nivel 3.
+**Una diferencia deliberada entre dos funciones parecidas.** `fn_asientos_disponibles`
+usa `GROUP BY`, de modo que un viaje inexistente no devuelve fila y levanta
+`NO_DATA_FOUND`. `fn_porcentaje_ocupacion` usa un `COUNT` simple, que siempre devuelve
+una fila, y por eso un bus sin asientos produce `ZERO_DIVIDE`. Las dos formas son
+correctas porque cada una necesita señalar un error distinto; no es una inconsistencia.
 
-### `03_Consultas_Cursores.sql` — nivel 2
+### `02_Pkg_Consultas.sql` — nivel 2
 
-| Bloque | Cursor | Futuro procedimiento |
+| Procedimiento | Cursor | Qué demuestra |
 |---|---|---|
-| 2.1 | **Sin parámetros**, `OPEN`/`FETCH`/`CLOSE` explícito | `sp_control_flota` |
-| 2.2 | **Con parámetro** y complejo (5 tablas) | `sp_registro_viaje` |
-| 2.3 | **Dos cursores con parámetros anidados** | `sp_disponibilidad` |
+| `sp_control_flota` | sin parámetros, `OPEN`/`FETCH`/`CLOSE` explícito | control manual del ciclo, con `CLOSE` en el manejador de excepciones |
+| `sp_registro_viaje(p_id_viaje)` | parametrizado, forma `FOR` | cursor complejo sobre 5 tablas |
+| `sp_disponibilidad(p_desde, p_hasta)` | **dos cursores parametrizados anidados** | el centro del indicador IE1.2.1 |
 
-El 2.1 usa la forma extendida a propósito, para dejar visible el ciclo de vida completo
-del cursor; el 2.2 usa `FOR`, que hace lo mismo implícitamente. Por eso el 2.1 lleva
-`CLOSE` también en su bloque `EXCEPTION`: si falla a mitad del recorrido el cursor
-quedaría abierto. Ese es el costo real de la forma extendida y la razón de preferir
-`FOR` en producción.
+`sp_control_flota` invoca `fn_conductores_requeridos` y `sp_disponibilidad` invoca
+`fn_porcentaje_ocupacion`. `sp_disponibilidad` **no** invoca `fn_asiento_ocupado` a
+propósito: su cursor interno obtiene todos los asientos con un `LEFT JOIN` en una sola
+consulta, y llamar a la función convertiría eso en N llamadas —ver §8—.
 
-El 2.3 es el bloque que sostiene el indicador **IE1.2.1** de la rúbrica. La relación
-entre los dos ciclos es de dependencia: los asientos que recorre el ciclo interior son
-los del bus asignado al viaje que el exterior tiene en curso, de modo que el cursor
-interior no puede abrirse hasta saber cuál es.
+### `03_Pkg_Operaciones.sql` — nivel 3
+
+La especificación declara **tres tipos** (§4), **ocho excepciones de usuario** y tres
+procedimientos. El cuerpo agrega la constante privada `c_ventana_anulacion := 4`.
+
+| Procedimiento | Reglas que hace cumplir |
+|---|---|
+| `sp_programar_viaje(..., p_id_viaje OUT)` | RN-03, RN-04, RN-10 |
+| `sp_vender_pasaje(..., p_id_venta OUT)` | RN-05, RN-06, RN-07 |
+| `sp_anular_pasaje(p_id_pasaje, p_motivo)` | RN-08, RN-09, ventana de 4 h |
+
+**Ningún procedimiento hace `COMMIT` ni `ROLLBACK`.** La decisión es deliberada: el
+procedimiento no sabe si es la operación completa o un paso dentro de una transacción
+mayor. Quien lo invoca es quien tiene esa información, y por eso es quien confirma o
+revierte. Los bloques de `05_Demostraciones.sql` siempre revierten.
+
+`sp_programar_viaje` **no** invoca `fn_conductores_requeridos`, porque el viaje todavía no
+existe cuando hay que validar la dotación: recalcula la duración desde la ruta.
+
+### `04_Triggers.sql`
+
+`trg_pasaje_historial` (auditoría del ciclo de vida) y `trg_pasaje_no_revive` (RN-08),
+explicados en la §6. El archivo cierra con un bloque de verificación que prueba ambos y
+termina en `ROLLBACK`.
+
+### `05_Demostraciones.sql`
+
+Siete bloques anónimos. Los dos primeros declaran sus propios tipos y demuestran `RECORD`
+y `VARRAY` en forma pura; los cinco restantes invocan los packages, capturan sus
+excepciones **por nombre** y revierten. Cubren tanto los caminos de éxito como los de
+rechazo de cada regla.
 
 ---
 
-## 6 bis. Cómo encontrar la justificación de cada bloque
+## 8. Auditoría de duplicación: qué convergió y qué no, y por qué
+
+**Origen:** al revisar el RECORD del pasaje se notó que resolvía la tarifa vigente con una
+consulta propia, independiente de `fn_tarifa_vigente`. Esta sección documenta la
+auditoría completa que eso disparó.
+
+**El principio aplicado, siempre el mismo:** *llamar a la función cuando el dato que
+necesita ya existe en ese contexto, sin importar si eso implica una consulta menor
+adicional; no llamarla cuando el dato de entrada no existe todavía o cuando convertiría
+una consulta de conjunto en N llamadas puntuales.*
+
+| Cálculo | Apariciones antes | Resultado |
+|---|---|---|
+| Tarifa vigente | 4 | Convergen todas en `fn_tarifa_vigente` |
+| Asiento ocupado | 4 | Convergen 3; `sp_disponibilidad` no, usa `LEFT JOIN` de conjunto |
+| Conductores requeridos | 4 | Convergen 2; `sp_programar_viaje` no, el viaje aún no existe |
+| Asientos ocupados de un viaje | 2 | Convergen en `fn_ocupados_viaje`, **privada** |
+
+**La lección.** Una duplicación es dañina cuando la misma regla se reescribe sin que haya
+una razón para la diferencia — ese fue el caso de la tarifa y del asiento ocupado, y
+convergieron sin costo. No es dañina cuando dos bloques calculan algo parecido por
+motivos genuinamente distintos: `sp_disponibilidad` necesita el conjunto completo, no un
+valor suelto; `sp_programar_viaje` no tiene todavía el dato de entrada que la función
+exige. Distinguir un caso del otro —y dejarlo escrito en el propio código— es lo que
+evita tanto la duplicación silenciosa como la convergencia forzada.
+
+---
+
+## 9. Cómo encontrar la justificación de cada bloque
 
 Cada archivo `.sql` abre con un bloque **TRAZABILIDAD CON LA DOCUMENTACIÓN** y cada
-bloque de código lleva sus propias líneas `Informe:` y `Anexo:`. Con eso se puede ir del
-código a su justificación sin buscar:
+bloque de código lleva sus propias líneas `Informe:` y `Anexo:`:
 
 | Desde el código | Se llega a |
 |---|---|
@@ -219,20 +314,17 @@ código a su justificación sin buscar:
 
 La cabecera del DDL además separa explícitamente **las reglas que se garantizan por
 estructura** —RN-01, 02, 05, 06, 07, 08 y 09— de **las que requieren PL/SQL** —RN-03,
-RN-04 y RN-10—. Esa distinción es la que responde a la pregunta de por qué unas cosas
-están en el modelo y otras en el código.
-
-La integración en sentido inverso, desde el informe hacia los archivos del script, se
-hará más adelante en otro formato.
+RN-04 y RN-10—. Esa distinción responde a la pregunta de por qué unas cosas están en el
+modelo y otras en el código.
 
 ---
 
-## 7. Dos criterios transversales que conviene no romper
+## 10. Dos criterios transversales que conviene no romper
 
-**El criterio de "asiento ocupado" nunca se escribe a mano.** Se toma siempre de
-`ESTADO_PASAJE.ocupa_asiento`, que es la misma condición que aplica el índice único
-parcial del DDL. Si mañana se agrega un estado, todo el script lo respeta sin
-modificarse. Aparece así en los bloques 1.3, 1.4, 2.2 y 2.3.
+**El criterio de "asiento ocupado" nunca se escribe a mano.** Vive en `fn_asiento_ocupado`
+y en la definición de `ESTADO_PASAJE.ocupa_asiento`, que es la misma condición que aplica
+el índice único parcial del DDL. Si mañana se agrega un estado, todo el script lo respeta
+sin modificarse.
 
 **La disponibilidad se calcula, nunca se almacena.** Guardarla como columna obligaría a
 sincronizarla con cada venta y cada anulación, y bastaría un fallo para que el dato
@@ -240,7 +332,7 @@ mintiera.
 
 ---
 
-## 8. Cómo el DDL implementa las reglas que el script no valida
+## 11. Cómo el DDL implementa las reglas que el script no valida
 
 Tres reglas no se programan: están en la estructura.
 
@@ -269,60 +361,61 @@ Consecuencia para el nivel 3: al intentar vender un asiento ya tomado, el motor 
 
 **Integridad asiento–bus–viaje** — `PASAJE` lleva `id_bus` a propósito. Con dos claves
 foráneas compuestas —`(id_viaje, id_bus)` hacia `VIAJE` y `(id_bus, nro_asiento)` hacia
-`ASIENTO`— la base garantiza de forma declarativa que el asiento vendido pertenece al
-bus que realiza ese viaje, sin trigger.
+`ASIENTO`— la base garantiza de forma declarativa que el asiento vendido pertenece al bus
+que realiza ese viaje, sin trigger.
 
 ---
 
-## 9. Lo que falta
+## 12. Estado de verificación
 
-### Nivel 3 — `04_Operaciones.sql`
+Ejecutado el 07-sep-2026 sobre `benja@FREEPDB1`, contenedor `oracle-practica`:
 
-| Bloque | Futuro procedimiento | Excepciones de usuario | RF · RN |
-|---|---|---|---|
-| 3.1 | `sp_programar_viaje` | `e_bus_ocupado`, `e_conductor_ocupado`, `e_jornada_excedida` | RF-03 · RN-02, RN-03, RN-04, RN-10 |
-| 3.2 | `sp_vender_pasaje` | `e_viaje_no_programado`, `e_pasajero_inexistente`, `e_asiento_no_disponible` | RF-01 · RN-05, RN-06, RN-07 |
-| 3.3 | `sp_anular_pasaje` | `e_fuera_de_plazo` | RF-02 · RN-08, RN-09 |
+- Las cinco funciones sueltas de la versión anterior fueron eliminadas del esquema.
+- Los tres packages compilan sin errores: **6 objetos `VALID`**, 0 inválidos.
+- Los dos triggers quedan `ENABLED` y su bloque de verificación pasa sus cuatro pruebas.
+- Los siete bloques de `05_Demostraciones.sql` corren completos, incluidos los caminos de
+  error (`NO_DATA_FOUND`, `e_jornada_excedida`, `e_viaje_no_programado`,
+  `e_fuera_de_plazo`).
+- Los datos quedan intactos tras la ejecución: 6 viajes, 4 ventas, 8 pasajes, 18 filas de
+  historial, 8 asignaciones de conductor. Todos los `ROLLBACK` operan.
 
-El 3.1 se escribe antes que el 3.2 porque la venta necesita viajes ya programados.
+---
 
-**Manejo de transacción:** cada bloque termina en `ROLLBACK` y lo declara en su cabecera,
-de modo que el script pueda ejecutarse cuantas veces se quiera sin ensuciar los datos de
-prueba. Al pasar a procedimientos en RA2 se cambia por `COMMIT` en el punto que
-corresponda. La alternativa —hacer `COMMIT` desde ya— obligaría a recargar el DDL cada
-vez que se quiera volver a demostrar, lo que en una defensa en vivo es peor.
-
-**Criterio de atomicidad:** una venta de tres asientos donde el segundo no está
-disponible se rechaza completa. No se registra la venta parcial de dos pasajes.
-
-### Preguntas abiertas con el profesor
-
-1. **¿Los procedimientos y triggers se implementan en esta entrega o sólo se evalúan?**
-   La pauta usa el verbo *evaluar* y su desarrollo corresponde al RA2. De la respuesta
-   depende si el nivel 3 queda en bloques anónimos o pasa directo a procedimientos.
-   La estructura descrita aquí funciona en ambos escenarios.
-2. ¿Se espera una cantidad mínima de RECORD, VARRAY y cursores, o se justifica según lo
-   que el caso necesite?
+## 13. Lo que falta
 
 ### Documentación
 
-Secciones 8.2, 9.2, 10, 11, 12, 13 y 14 del informe, que se completan una vez que el
-nivel 3 exista.
+Secciones **8.2, 9.2, 10, 11, 12, 13 y 14** del informe. Ahora que el código existe se
+pueden completar con la implementación real. La sección 11 (Triggers) tiene material
+directo en `04_Triggers.sql` y en la §6 de esta guía. La sección 10 (Packages) tiene su
+argumento en la §3.
 
----
+La pauta exige además, en Anexos, **"incluir el código completo utilizado en el proyecto"**.
 
-## 10. Cómo verificar que todo sigue funcionando
+**En `ANEXO_Tablas_de_Referencia.docx`:**
+- Tabla 29 — corregir el valor retornado de `fn_tarifa_vigente` a *"Identificador de la
+  tarifa vigente"*, y agregar una fila para `fn_asiento_ocupado`.
+- Tablas 28 y 29 — los nombres ahora se califican con el package
+  (`pkg_calculos.fn_tarifa_vigente`, `pkg_operaciones.sp_vender_pasaje`).
+- Tablas 26 y 27 — las ocho excepciones de usuario ahora son públicas y se capturan por
+  nombre calificado.
 
-```bash
-cd /home/benja/Archivo.Personal/01_Materias/Taller_BBDD/02_Scripts
-for f in DDL/Modelo_GestionTransporte_DDL.sql PLSQL/*.sql; do
-    docker cp "$f" oracle-practica:/tmp/x.sql
-    echo "== $f"
-    docker exec oracle-practica bash -lc \
-      'sqlplus -s -L benja/benja123@//localhost:1521/FREEPDB1 @/tmp/x.sql' \
-      2>&1 | grep -cE "ORA-|PLS-"
-done
-```
+### Observación sobre los datos de prueba
 
-Salvo los `ORA-00942` de los `DROP` en la primera corrida del DDL, el conteo debe ser
-**0** en todos los archivos.
+El poblamiento usa fechas fijas de septiembre de 2026. Con el paso del tiempo todos sus
+viajes quedan en el pasado, lo que tiene dos efectos:
+
+- Hay viajes en estado `PRO` cuya salida ya ocurrió, que es una inconsistencia entre el
+  estado y la fecha.
+- La ventana de cuatro horas de RF-02 no puede cumplirse con ningún pasaje existente, por
+  lo que el bloque 7 de las demostraciones debe preparar su propio escenario antes de
+  probar el camino de éxito.
+
+**Conviene generar las fechas del poblamiento relativas a `SYSDATE`.** Es un cambio
+acotado al DDL y haría que la demostración funcione cualquier día, lo que importa para
+una defensa en vivo.
+
+### Preguntas abiertas con el profesor
+
+¿Se espera una cantidad mínima de RECORD, VARRAY y cursores, o se justifica según lo que
+el caso necesite?

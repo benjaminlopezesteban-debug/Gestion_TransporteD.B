@@ -58,7 +58,7 @@ DROP TABLE ruta               CASCADE CONSTRAINTS PURGE;
 DROP TABLE estado_pasaje      CASCADE CONSTRAINTS PURGE;
 DROP TABLE tipo_asiento       CASCADE CONSTRAINTS PURGE;
 DROP TABLE terminal           CASCADE CONSTRAINTS PURGE;
-
+ 
 
 --------------------------------------------------------------------------------
 -- 2. TABLAS

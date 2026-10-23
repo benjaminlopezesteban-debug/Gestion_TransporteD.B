@@ -1,0 +1,75 @@
+create or replace funcion FN_STOCK_DISPONIBLE(
+
+
+
+
+CREATE OR REPLACE PACKAGE PKG_INVENTARIO (
+
+	P_producto_id IN NUMBER
+) RETURN NUMBER;
+
+PROCEDURE DESCONTAR_STOCK(
+P_producto_id in number,
+P_cantidad in number,
+P_venta_id in number
+)
+
+PROCEDURE DEVOLVER_STOCK(
+
+p_producto_id in number,
+p_cantidad in number,
+p_venta_id in number
+);
+
+end PKG_inventario;
+/
+
+CREATE OR REPLACE PACKAGE BODY PKG_INVENTARIO AS FUNTION STOCK_DISPONIBLE(
+	FUNCTION STOCK_DISPONIBLE(
+		p_producto_id in number
+		)return number
+		is
+		v_stock PRODUCTO.stock%TYPE;
+BEGIN 
+	SELECT stock 
+	INTO v_stock
+	FROM PRODUCTO
+	WHERE producto_id = p_producto_id;
+	
+	return v_stock;
+	
+	exception 
+	when no_data_found THEN 
+	RAISE_APPLICATION_ERROR(-20001, 'PRODUCTO INEXISTE2
+	END STOCK_DISPONIBLE;
+	
+	
+	
+PROCEDURE DESCONTAR_STOCK(
+P_producto_id in number,
+p_cantidad in number,
+p_venta_id in number
+) --en los procedimientos almacendados se puede retornar valores con la palabra out en la declaración de variables. 
+is 
+v_stock PRODUCTO.stock%TYPE;
+v_estado PRODUCTO.estado%TYPE:
+BEGIN
+if p_cantidad <= 0 then
+RAISE_APPLICATION_ERROR(-20002,
+'la cantidad debe ser mayor que cero.'); end if;
+
+SELECT stock , estado
+into v_stock, v_stado
+form producto 
+where producto_d = p_producto_id
+
+if v_estado <> 'activo' then 
+raise_application_error(-20002, 'El producto nos eenecuetra') END IF;
+
+if v_stock < p_cantidad then raise aplicatión error .......
+end if; 
+
+
+if SQL%ROWCOUNT = 0 then --- si no se actualizan filas SQL%ROWCOUNT cuenta la filas modificadas. 
+raisee ......error 
+end if 

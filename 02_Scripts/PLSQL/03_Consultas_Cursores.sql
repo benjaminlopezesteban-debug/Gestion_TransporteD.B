@@ -55,7 +55,7 @@ PROMPT ================================================================
 
 
 --------------------------------------------------------------------------------
--- 2.1  Control de flota        ->  futuro PROCEDURE sp_control_flota
+-- 3.1  Control de flota        ->  futuro PROCEDURE sp_control_flota
 --
 -- Cursor SIN parametros, con OPEN / FETCH / CLOSE explicito.
 -- Sirve a  : RF-03 (programacion)      Verifica : RN-10
@@ -137,7 +137,7 @@ END;
 
 
 --------------------------------------------------------------------------------
--- 2.2  Registro de viajes      ->  futuro PROCEDURE sp_registro_viaje
+-- 3.2  Registro de viajes      ->  futuro PROCEDURE sp_registro_viaje
 --
 -- Cursor CON parametro, y ademas cursor complejo.
 -- Sirve a  : RF-05      Genera : I-05
@@ -233,139 +233,80 @@ END;
 
 
 --------------------------------------------------------------------------------
--- 2.3  Disponibilidad de asientos  ->  futuro PROCEDURE sp_disponibilidad
---
--- DOS CURSORES CON PARAMETROS TRABAJANDO EN FORMA SIMULTANEA.
--- Sirve a  : RF-04      Genera : I-03      Verifica : RN-01, RN-06
--- Informe  : 6.5 (loops anidados), 6.6 (limitaciones), 8.1 (sp_disponibilidad)
--- Anexo    : Tabla 28, Tabla 3 (RF-04), Tabla 9 (I-03)
---
--- Es el requerimiento que el enunciado exige con todas sus letras: "el sistema
--- debe controlar la asignacion de buses y la disponibilidad de asientos para
--- cada viaje". No es un reporte de gestion sino control operacional: sin esta
--- consulta no se puede vender sin arriesgar sobreventa.
---
--- POR QUE DOS NIVELES Y NO UNO
---
--- La relacion entre ambos ciclos es de dependencia, no de conveniencia: el
--- conjunto que recorre el ciclo interior esta determinado por la fila que el
--- exterior tiene en curso. Los asientos a revisar son los del bus asignado a ESE
--- viaje, de modo que el cursor interior no puede abrirse hasta saber cual es.
---
---     POR CADA VIAJE del rango             <- cursor 1, con parametros
---         POR CADA ASIENTO de su bus       <- cursor 2, con parametros
---             determinar si esta libre u ocupado
---         calcular el porcentaje de ocupacion del viaje
---
--- LIMITACION QUE SE ASUME
---
--- El recorrido fila a fila es mas costoso que una operacion de conjunto. Si solo
--- se necesitara el porcentaje agregado, una consulta con JOIN, GROUP BY y
--- funciones de agregacion lo resolveria sin iterar y con mejor rendimiento. Los
--- dos ciclos se justifican porque el proceso necesita ademas el detalle asiento
--- por asiento, que es lo que el vendedor consulta al momento de vender. Sobre
--- volumenes grandes esta diferencia se vuelve determinante y habria que revisar
--- el diseno.
 --------------------------------------------------------------------------------
-DECLARE
-    -- PARAMETROS del futuro procedimiento
-    p_desde  CONSTANT DATE := TO_DATE('01-09-2026','DD-MM-YYYY');
-    p_hasta  CONSTANT DATE := TO_DATE('03-09-2026','DD-MM-YYYY') + 1;
+-- 3.3  Buscar CONDUCTOR libre
+-- Sirve a: RF-03   |   Implementa: RN-03, RN-04
+--
+-- Ambos cursores invocan fn_recurso_ocupado, que es la funcion del nivel 1 que sabe si un recurso esta ocupado en un intervalo de tiempo. 
+-- Si devuelve NULL, el recurso esta libre. Si devuelve un id_viaje, el recurso esta ocupado en ese viaje.
+-- Ve tanto para buses como para conductores, y por eso se invoca con parametros de recurso distintos.
 
-    -- CURSOR EXTERIOR: los viajes del rango pedido
-    CURSOR c_viajes (cp_desde DATE, cp_hasta DATE) IS
-        SELECT v.id_viaje,
-               v.id_bus,
-               v.salida_prog,
-               v.estado_viaje,
-               o.ciudad || ' - ' || d.ciudad AS trayecto
-        FROM   viaje v
-        JOIN   ruta  r     ON r.id_ruta      = v.id_ruta
-        JOIN   terminal o  ON o.id_terminal  = r.id_terminal_origen
-        JOIN   terminal d  ON d.id_terminal  = r.id_terminal_destino
-        WHERE  v.salida_prog >= cp_desde
-        AND    v.salida_prog <  cp_hasta
-        ORDER  BY v.salida_prog;
+-- Primero se declaran los cursores, y luego se invocan con el mismo intervalo de tiempo, que es el del viaje a programar. Obteniendo los busees y conductores libres en ese intervalo de tiempo.
+-- Posteriormente se tiene que mostrar la informacion de los buses y conductores libres en ese intervalo de tiempo, para que el usuario pueda elegir uno de cada tipo y programar el viaje.
+-- En otro procedimiento se debera programar con el bus y conductor elegidos, asignando el viaje a ese bus y conductor, y cambiando el estado del viaje a programado.
+-- Ojo debe de haber 2 conductores si el viaje dura mas de 5 horas, y el procedimiento debe de verificar que los conductores elegidos esten libres en ese intervalo de tiempo.alter
+--------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION fn_buscar_conductor_libre (
+    v_salida IN viaje.salida_prog%TYPE,
+    v_llegada IN viaje.llegada_prog%TYPE
+)
+RETURN conductor.id_conductor%TYPE
+AS
+    -- cursores
+    CURSOR c_conductores_libres (cp_salida  viaje.salida_prog%TYPE, cp_llegada viaje.llegada_prog%TYPE) --
+        IS
+        SELECT c.id_conductor,
+               c.papellido || ', ' || c.pnombre nombre,
+               c.nro_licencia
+        FROM   conductor c
+        -- MISMA funcion, otro recurso. Aqui se paga la decision de haberla
+        -- escrito con dos parametros de recurso en vez de dos funciones.
+        WHERE  fn_recurso_ocupado(cp_salida, cp_llegada,
+                                  p_id_conductor => c.id_conductor) IS NULL
+        ORDER  BY c.papellido, c.pnombre;
 
-    -- CURSOR INTERIOR: los asientos del bus, con la marca de ocupacion para ESE
-    -- viaje. El LEFT JOIN es lo que permite ver tambien los asientos libres: un
-    -- INNER JOIN devolveria solo los vendidos y la consulta perderia sentido.
-    CURSOR c_asientos (cp_id_bus bus.id_bus%TYPE, cp_id_viaje viaje.id_viaje%TYPE) IS
-        SELECT a.nro_asiento,
-               a.piso,
-               ta.codigo AS tipo,
-               CASE WHEN p.id_pasaje IS NULL THEN 'LIBRE' ELSE 'OCUPADO' END AS situacion
-        FROM   asiento a
-        JOIN   tipo_asiento ta ON ta.id_tipo_asiento = a.id_tipo_asiento
-        LEFT   JOIN pasaje p
-               ON  p.id_bus      = a.id_bus
-               AND p.nro_asiento = a.nro_asiento
-               AND p.id_viaje    = cp_id_viaje
-               AND p.id_estado IN (SELECT id_estado FROM estado_pasaje
-                                   WHERE ocupa_asiento = 'S')
-        WHERE  a.id_bus = cp_id_bus
-        ORDER  BY a.piso, a.nro_asiento;
-
-    v_capacidad   PLS_INTEGER;      -- asientos del bus (RN-01)
-    v_ocupados    PLS_INTEGER;      -- asientos tomados en ese viaje
-    v_porcentaje  NUMBER;
-    v_libres_txt  VARCHAR2(200);    -- numeros de asiento libres, para el vendedor
-    v_viajes      PLS_INTEGER := 0;
+    v_id_conductor_libre  conductor.id_conductor%TYPE;  -- para mostrar el id del conductor libre
+    v_id_bus_libre        bus.id_bus%TYPE;              -- para mostrar el id
 BEGIN
-    DBMS_OUTPUT.PUT_LINE('2.3 Disponibilidad entre ' ||
-                         TO_CHAR(p_desde,'DD-MM-YYYY') || ' y ' ||
-                         TO_CHAR(p_hasta-1,'DD-MM-YYYY'));
 
-    -- CICLO EXTERIOR
-    FOR rv IN c_viajes(p_desde, p_hasta) LOOP
-        v_viajes     := v_viajes + 1;
-        v_capacidad  := 0;
-        v_ocupados   := 0;
-        v_libres_txt := NULL;
+    FOR r_conductor IN c_conductores_libres(v_salida, v_llegada) LOOP
+        DBMS_OUTPUT.PUT_LINE('    conductor ' || r_conductor.id_conductor || ' (' || r_conductor.nombre || ') - Licencia: ' || r_conductor.nro_licencia);
+        return; 
+        -- Solo se muestra el primer conductor libre, ya que solo se necesita uno para programar el viaje. 
+        --Si el viaje dura mas de 5 horas, se debera invocar nuevamente el cursor para obtener otro conductor libre. Para obtener otro conductor libre.
+        --Pero se desarrollara esa doble invocacion en otro procedimiento, ya que este procedimiento solo se encarga de mostrar los buses y conductores libres.
+    END LOOP;   
 
-        -- CICLO INTERIOR: depende de rv, la fila que el exterior tiene en curso
-        FOR ra IN c_asientos(rv.id_bus, rv.id_viaje) LOOP
-            v_capacidad := v_capacidad + 1;
+    -- 
 
-            IF ra.situacion = 'OCUPADO' THEN
-                v_ocupados := v_ocupados + 1;
-            ELSE
-                -- Se arma la lista de libres mientras se recorre, para no tener
-                -- que volver a consultar la tabla despues.
-                v_libres_txt := v_libres_txt ||
-                                CASE WHEN v_libres_txt IS NULL THEN '' ELSE ',' END ||
-                                ra.nro_asiento;
-            END IF;
-        END LOOP;
+END;
+/
 
-        -- Al cerrar el ciclo interior ya se tiene todo lo del viaje en curso
-        v_porcentaje := ROUND(v_ocupados * 100 / v_capacidad, 1);
+--3.4 buscar BUS libre
+CREATE OR REPLACE PROCEDURE sp_buscar_bus_libre (
+    v_salida IN viaje.salida_prog%TYPE,
+    v_llegada IN viaje.llegada_prog%TYPE
+)
+AS
+    -- CURSORES
+    CURSOR c_buses_libres (cp_salida  viaje.salida_prog%TYPE, cp_llegada viaje.llegada_prog%TYPE) -- El intervalo de tiempo es el mismo para todos los buses, y se pasa como parametro.
+        IS
+        SELECT b.id_bus, b.patente, COUNT(a.nro_asiento) capacidad
+        FROM   bus b
+        JOIN   asiento a ON a.id_bus = b.id_bus
+        -- NULL = libre. Es la respuesta que se busca, no un error.
+        WHERE  fn_recurso_ocupado(cp_salida, cp_llegada, p_id_bus => b.id_bus) IS NULL
+        GROUP  BY b.id_bus, b.patente
+        -- El mas grande primero: si dos sirven, conviene el de mas plazas.
+        ORDER  BY capacidad DESC, b.id_bus;
 
-        DBMS_OUTPUT.PUT_LINE('    viaje ' || LPAD(rv.id_viaje,2) ||
-                             ' | ' || RPAD(rv.trayecto,22) ||
-                             ' | ' || TO_CHAR(rv.salida_prog,'DD-MM HH24:MI') ||
-                             ' | ' || rv.estado_viaje ||
-                             ' | ocupa ' || LPAD(v_ocupados,2) || '/' || LPAD(v_capacidad,2) ||
-                             ' (' || LPAD(TO_CHAR(v_porcentaje,'FM990.0'),5) || '%)');
+v_id_bus_libre        bus.id_bus%TYPE;   -- para mostrar el id
 
-        IF v_libres_txt IS NULL THEN
-            DBMS_OUTPUT.PUT_LINE('             sin asientos disponibles');
-        ELSE
-            DBMS_OUTPUT.PUT_LINE('             libres: ' || v_libres_txt);
-        END IF;
+BEGIN
+    --- Se invocan los cursores con el mismo intervalo de tiempo, que es el del viaje a programar
+    FOR r_bus IN c_buses_libres(v_salida, v_llegada) LOOP
+        DBMS_OUTPUT.PUT_LINE('    bus ' || r_bus.id_bus || ' (' || r_bus.patente || ') - Capacidad: ' || r_bus.capacidad);
     END LOOP;
-
-    IF v_viajes = 0 THEN
-        DBMS_OUTPUT.PUT_LINE('    No hay viajes programados en ese rango.');
-    ELSE
-        DBMS_OUTPUT.PUT_LINE('    ' || v_viajes || ' viaje(s) revisado(s).');
-    END IF;
-EXCEPTION
-    -- Un bus sin asientos registrados deja v_capacidad en cero y rompe el
-    -- calculo del porcentaje. No deberia ocurrir, porque contradice RN-01, pero
-    -- si ocurre conviene un diagnostico util en lugar de un error del motor.
-    WHEN ZERO_DIVIDE THEN
-        DBMS_OUTPUT.PUT_LINE('    Hay un viaje cuyo bus no tiene asientos ' ||
-                             'registrados: revisar los datos de flota.');
+    
 END;
 /

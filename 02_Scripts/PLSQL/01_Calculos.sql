@@ -8,29 +8,12 @@
 -- todos los demas dependeran de ellos: la venta necesita el precio vigente, la
 -- programacion necesita saber cuantos conductores exige el viaje, y la consulta
 -- de disponibilidad necesita contar asientos libres.
---
--- Escribirlos al final obligaria a incrustar esos calculos dentro de los bloques
--- que los consumen y a extraerlos despues, reescribiendo cada uno. Escribirlos
--- primero permite que los niveles siguientes los invoquen ya resueltos.
---
--- FRONTERA DE FUNCION
---
--- Cada bloque esta escrito con la forma que tendra al convertirse en funcion:
---   - Las entradas van como CONSTANT con prefijo p_ al inicio del DECLARE.
---     Al extraerlo, esas lineas pasan a la firma y desaparecen del cuerpo.
---   - El resultado se deposita siempre en una unica variable de retorno.
---   - El cuerpo entre BEGIN y EXCEPTION no cambia al extraerse.
--- La conversion a funcion es entonces mecanica y no reescritura.
+
+-- FRONTERA DE FUNCION Convertir los calculos en funciones almacenadas
 --
 -- SOBRE LAS EXCEPCIONES DE ESTE NIVEL
 --
--- Aqui aparecen unicamente excepciones PREDEFINIDAS de Oracle, y no es una
--- omision: en este nivel los errores posibles son los que el motor detecta por
--- si mismo -no hay dato, hay mas de uno, se divide por cero-. Las excepciones
--- definidas por el usuario corresponden al nivel 3, donde se validan reglas de
--- negocio que el motor no puede conocer. Declarar una excepcion propia aqui,
--- donde una predefinida ya describe la situacion, seria usarla por cumplir un
--- requisito formal y no por necesidad tecnica.
+-- Aqui aparecen unicamente excepciones PREDEFINIDAS de Oracle
 --------------------------------------------------------------------------------
 
 SET SERVEROUTPUT ON SIZE UNLIMITED
@@ -38,37 +21,34 @@ SET LINESIZE 140
 SET PAGESIZE 60 
 
 --------------------------------------------------------------------------------
--- 1.1  Tarifa vigente          ->  futura FUNCTION fn_tarifa_vigente
+-- 1.1  Tarifa vigente ->  futura FUNCTION fn_tarifa_vigente
 --
 -- Entradas : p_id_ruta, p_id_tipo_asiento, p_fecha
 -- Devuelve : precio que rige para esa combinacion en esa fecha
 -- Sirve a  : RF-01 (venta)      Implementa : RN-07
 --
 -- Problema que resuelve: TARIFA conserva el historico completo de precios,
--- porque RN-07 exige que el precio varie segun la condicion comercial. Por eso
--- una consulta directa a la tabla puede devolver varias filas para la misma
--- ruta y tipo de asiento: la vigente y las ya vencidas. Este calculo aisla la
--- que corresponde a una fecha dada.
+-- porque RN-07 exige que el precio varie segun la condicion comercial. 
 --
--- Por que funcion y no procedimiento: devuelve un unico valor a partir de sus
+-- Por que funcion devuelve un unico valor a partir de sus
 -- parametros y no modifica estado. Esa condicion es la que permite ademas
 -- invocarla desde una sentencia SQL, cosa que un procedimiento no admite.
+
+
 --------------------------------------------------------------------------------
-DECLARE
-    -- PARAMETROS de la futura funcion -- Al terminar limpiar atributos recordar --p de parametro
-    p_id_ruta          CONSTANT ruta.id_ruta%TYPE                 := 7;  -- Concepcion
-    p_id_tipo_asiento  CONSTANT tipo_asiento.id_tipo_asiento%TYPE := 2;  -- Salon Cama
-    p_fecha            CONSTANT DATE                              := SYSDATE; --Fecha actual
-
-    -- RETORNO
-    v_precio  tarifa.precio%TYPE;
+CREATE OR REPLACE FUNCTION obtener_precio_tarifa (
+    p_id_ruta         IN ruta.id_ruta%TYPE,
+    p_id_tipo_asiento IN tipo_asiento.id_tipo_asiento%TYPE,
+    p_fecha           IN DATE DEFAULT SYSDATE   -- Si no se especifica, usa la fecha actual
+) RETURN NUMBER
+IS
+    v_precio tarifa.precio%TYPE;
 BEGIN
-
-    -- Consulta la tarifa vigente para la combinacion dada en la fecha especificada. Esta vigente si ya empezo en la fecha y no ha vencido aun, o si no tiene fecha de vencimiento.
-    -- TRUNC elimina la hora para que la comparacion sea solo por fecha.
+    -- Consulta la tarifa vigente para la combinación dada en la fecha especificada.
+    -- TRUNC elimina la hora para comparar solo por fecha.
     SELECT tf.precio
-        INTO   v_precio
-        FROM   tarifa tf
+    INTO   v_precio
+    FROM   tarifa tf
     WHERE  tf.id_ruta          = p_id_ruta
     AND    tf.id_tipo_asiento  = p_id_tipo_asiento
     AND    tf.vigencia_desde  <= TRUNC(p_fecha)
@@ -76,17 +56,20 @@ BEGIN
 
     DBMS_OUTPUT.PUT_LINE('1.1 Tarifa vigente' || '    ruta ' || p_id_ruta || ' tipo ' || p_id_tipo_asiento || ' al ' || TO_CHAR(p_fecha,'DD-MM-YYYY') ||
                          '  ->  $' || TO_CHAR(v_precio,'FM999G999'));
-EXCEPTION
+    RETURN v_precio;
 
-    -- No existe tarifa definida para esa combinacion en esa fecha. 
+EXCEPTION
+    -- No existe tarifa para esa combinación en esa fecha
     WHEN NO_DATA_FOUND THEN
         DBMS_OUTPUT.PUT_LINE('1.1 Sin tarifa vigente para ruta ' || p_id_ruta || ' al ' || TO_CHAR(p_fecha,'DD-MM-YYYY'));
 
-    -- Incosistencia del catalogo:Existe mas de una vigencia solapada para la misma ruta y tipo. 
+    -- Inconsistencia en el catálogo: más de una tarifa vigente solapada
     WHEN TOO_MANY_ROWS THEN
         DBMS_OUTPUT.PUT_LINE('1.1 Catalogo inconsistente: mas de una tarifa vigente para ruta ' || p_id_ruta );
-END;
+END obtener_precio_tarifa;
 /
+
+
 
 
 --------------------------------------------------------------------------------
@@ -105,38 +88,19 @@ END;
 -- ruta de 5,00 h exactas queda en el limite y se cubre con uno solo.
 --------------------------------------------------------------------------------
 
-DECLARE
-    -- PARAMETRO de la futura funcion --recordar limpiar atributos p de parametro este sera ingresado por el usuario
-    p_id_viaje  CONSTANT viaje.id_viaje%TYPE := 6;   -- Santiago - Concepcion
-
-    -- RETORNO
-    v_conductores  PLS_INTEGER;
-
-    -- Auxiliares del calculo
-    v_duracion_min  ruta.duracion_estimada_min%TYPE;
-    c_max_horas     CONSTANT NUMBER := 5;   -- limite legal por conductor
-
+CREATE OR REPLACE FUNCTION fn_conductores_requeridos (
+    p_id_ruta IN ruta.id_ruta%TYPE          -- antes recibia p_id_viaje
+) RETURN PLS_INTEGER
+IS
+    c_max_horas    CONSTANT NUMBER := 5;    -- RN-10
+    v_duracion_min ruta.duracion_estimada_min%TYPE;
 BEGIN
-    -- Consulta la duracion de la ruta, un atributo que vive en ruta no del viaje: el viaje solo la hereda al referenciarla.
-    SELECT r.duracion_estimada_min
-        INTO   v_duracion_min
-        FROM   viaje v
-        JOIN   ruta  r 
-        ON r.id_ruta = v.id_ruta
-        WHERE  v.id_viaje = p_id_viaje;
+    SELECT r.duracion_estimada_min INTO v_duracion_min
+    FROM   ruta r WHERE r.id_ruta = p_id_ruta;
 
-    v_conductores := CEIL(v_duracion_min / 60 / c_max_horas); --CEIL redondea hacia arriba porque la fraccion sobrante tambien necesita quien la conduzca
-
-    DBMS_OUTPUT.PUT_LINE('1.2 Conductores requeridos' || '    viaje ' || p_id_viaje || ' dura ' || ROUND(v_duracion_min/60, 2) || ' h' ||
-                         '  ->  exige ' || v_conductores || ' conductor(es)');
-
-EXCEPTION
-    --No existe viaje con ese id. La duracion no se puede calcular y el error es de datos maestros.
-    WHEN NO_DATA_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('1.2 El viaje ' || p_id_viaje || ' no existe.');
-END;
+    RETURN CEIL(v_duracion_min / 60 / c_max_horas);
+END fn_conductores_requeridos;
 /
-
 
 --------------------------------------------------------------------------------
 -- 1.3  Asientos disponibles    ->  futura FUNCTION fn_asientos_disponibles
@@ -209,13 +173,7 @@ END;
 -- libres en un bus de 10 y en uno de 40 describen situaciones opuestas. El
 -- porcentaje normaliza esa medida.
 --
--- Sobre ZERO_DIVIDE: la division falla si el bus no tiene asientos registrados.
--- Se podria evitar comprobando el divisor antes de dividir, y en produccion esa
--- seria la forma correcta. Aqui se maneja como excepcion porque la condicion no
--- deberia ocurrir nunca -un bus sin asientos contradice la premisa del negocio-
--- y lo que interesa es que, si ocurre, el programa entregue un diagnostico util
--- en lugar de detenerse con un error del motor. La excepcion actua como red de
--- seguridad de una condicion anomala, no como control de flujo previsto.**Considere eliminarla para reducir complejidad y porque la division por cero no deberia ocurrir nunca.**
+
 --------------------------------------------------------------------------------
 DECLARE
     -- PARAMETRO de la futura funcion
@@ -254,4 +212,70 @@ EXCEPTION
     WHEN NO_DATA_FOUND THEN
         DBMS_OUTPUT.PUT_LINE('1.4 El viaje ' || p_id_viaje || ' no existe.');
 END;
+/
+
+---------------------------------------------------------------------------------
+-- 1.5 Evaluar si un recurso esta ocupado fn_recurso_ocupado
+-- Evaluar si un recurso esta ocupado en un intervalo de tiempo
+
+
+CREATE OR REPLACE FUNCTION fn_recurso_ocupado (
+      p_salida       IN viaje.salida_prog%TYPE, --inicio del intervalo de tiempo a evaluar
+      p_llegada      IN viaje.llegada_prog%TYPE, --fin del intervalo de tiempo a evaluar
+      p_id_bus       IN viaje.id_bus%TYPE            DEFAULT NULL,
+      p_id_conductor IN conductor.id_conductor%TYPE  DEFAULT NULL,
+      p_excluir      IN viaje.id_viaje%TYPE          DEFAULT NULL
+  ) RETURN viaje.id_viaje%TYPE -- devuelve el id del viaje que ocupa el recurso, o NULL si esta libre
+  IS
+      v_conflicto viaje.id_viaje%TYPE; -- id del viaje que ocupa el recurso en ese intervalo, o NULL si esta libre
+  BEGIN
+        -- Esta funcion evalua un recurso (bus o conductor) en un intervalo de tiempo. Devuelve el id del viaje que lo ocupa, o NULL si esta libre.
+
+      IF (p_id_bus IS NULL     AND p_id_conductor IS NULL) -- Si no se indica recurso, no se puede evaluar ocupacion
+      OR (p_id_bus IS NOT NULL AND p_id_conductor IS NOT NULL)  -- O si se indican ambos, tampoco se puede evaluar ocupacion
+      THEN
+          RAISE_APPLICATION_ERROR(-20020,'Indique exactamente un recurso.');
+      END IF;
+
+      SELECT MIN(v.id_viaje) -- MIN para devolver un solo valor, aunque haya varios viajes que ocupen el recurso en ese intervalo
+      INTO v_conflicto
+      FROM   viaje v
+      WHERE  v.estado_viaje IN ('PRO','ENC') -- Solo se consideran viajes programados o en curso, no los finalizados ni cancelados
+      AND    (p_excluir IS NULL OR v.id_viaje <> p_excluir) -- Excluye el viaje que se esta programando, si se indica
+      AND    p_salida      < v.llegada_prog -- El viaje que ocupa el recurso debe solaparse con el intervalo indicado
+      AND    v.salida_prog < p_llegada      --
+      AND    (  (p_id_bus IS NOT NULL AND v.id_bus = p_id_bus)
+             OR (p_id_conductor IS NOT NULL AND EXISTS (
+                    SELECT 1 FROM viaje_conductor vc
+                    WHERE vc.id_viaje=v.id_viaje AND vc.id_conductor=p_id_conductor)) );
+      RETURN v_conflicto;
+END;
+/
+
+
+-- fn_llegada_estimada
+-- Sirve a: RF-03   |   Informe: seccion 9.2
+--
+-- El operador indica ruta y salida; la llegada NO se le pide, se deriva. Pedirla
+-- como parametro abriria la puerta a que contradiga la duracion de la ruta, y
+-- entonces habria dos versiones del mismo hecho.
+--------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION fn_llegada_estimada (
+    p_id_ruta IN ruta.id_ruta%TYPE,
+    p_salida  IN viaje.salida_prog%TYPE
+) RETURN viaje.llegada_prog%TYPE
+IS
+    v_duracion_min ruta.duracion_estimada_min%TYPE;
+BEGIN
+    SELECT r.duracion_estimada_min
+    INTO   v_duracion_min
+    FROM   ruta r
+    WHERE  r.id_ruta = p_id_ruta;
+
+    -- NUMTODSINTERVAL y no p_salida + v_duracion_min/1440: sumar un NUMBER a un
+    -- TIMESTAMP lo degrada a DATE y pierde la fraccion de segundo. Comprobado:
+    --   NUMTODSINTERVAL  -> 03-09-2026 14:30:00.123456
+    --   dividir por 1440 -> 03-09-2026 14:30:00.000000
+    RETURN p_salida + NUMTODSINTERVAL(v_duracion_min, 'MINUTE');
+END fn_llegada_estimada;
 /

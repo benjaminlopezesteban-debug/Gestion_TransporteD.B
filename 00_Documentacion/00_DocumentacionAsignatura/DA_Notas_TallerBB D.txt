@@ -77,4 +77,19 @@ Tenia una bb.dd cargada en localhost ocupando un motor de docker para versionar 
 
 Limpiare el esquema actual para ahorra fricción 
 
+Clase 07 de octubre. 
 
+Ejecutar desde el 782 hacia arriba
+El trigger no se le pasan datos, ni siquieran se invocan. Solo se llamar o ejecutan de manera automica. 
+
+Ojito con los commits y los rollback para mantener la consistencia de las operaciones. Si no se ejecuta correctamente se debe aplicar un rollback y generar una excepción con un mensaje. tener cuidado algunos rollback mal gestionados y excepciones mal gestionadas, podrian cancelarse una venta entregar un mensaje de ingresado por no manejarse con un mensaje la excepción mientras se ejecuta un rollbck y no se confirma la operación. El cliente entra en confusión y el sistema es incosistente.
+
+
+Hay que obligatoriamente condicionaral usuario para que ingrese los datos correctos como el rut. se puede realizar de manera estructural para que sea integro. 
+
+Tener cuidado con los tipos de datos entre distintos motores, dependiendo del motor el tipo de dato puede ser distinto ej. varchar2 != nvarchar
+
+
+Con un call ------------- Podemos realizar una inserciión 
+
+Tener cuidado con las dependencias de los dato.

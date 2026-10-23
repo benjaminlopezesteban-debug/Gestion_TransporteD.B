@@ -1,0 +1,85 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Entity class="oracle.dbtools.crest.model.design.logical.Entity" directorySegmentName="seg_0" id="CB463978-7A68-0D83-86BD-C4B5541576BD" name="SERVICIO">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-24 01:44:00 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<engineerTo>
+<item key="0FA7FB0D-A261-7FA1-D859-2055443BF26F" value="true"/>
+</engineerTo>
+<adequatelyNormalized>NO</adequatelyNormalized>
+<expectedVolumes>0</expectedVolumes>
+<fwdEngineeringStrategyName>Single Table</fwdEngineeringStrategyName>
+<growthPercent>0</growthPercent>
+<growthType>Year</growthType>
+<maxVolumes>9999999</maxVolumes>
+<minVolumes>0</minVolumes>
+<normalForm>Third</normalForm>
+<attributes itemClass="oracle.dbtools.crest.model.design.logical.Attribute">
+<Attribute name="id_servicio" id="44F170A3-DD28-8D9C-072A-A179BD19ADDC">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-24 02:02:38 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<engineerTo>
+<item key="0FA7FB0D-A261-7FA1-D859-2055443BF26F" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="id_terminal" id="70B844CF-C284-AD4D-3F1E-68FF81857988">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-24 02:02:28 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<engineerTo>
+<item key="0FA7FB0D-A261-7FA1-D859-2055443BF26F" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="id_conductor" id="DB267076-8F2E-D02F-8B18-DB0980F54830">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-24 02:02:50 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<engineerTo>
+<item key="0FA7FB0D-A261-7FA1-D859-2055443BF26F" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="id_horario" id="F1AE487D-BF8B-F56B-0B67-769CCFCAB810">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-24 02:02:56 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<engineerTo>
+<item key="0FA7FB0D-A261-7FA1-D859-2055443BF26F" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="id_bus" id="48CB6769-340F-E7E9-15A0-1EE0EF585BB9">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-24 02:03:03 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<engineerTo>
+<item key="0FA7FB0D-A261-7FA1-D859-2055443BF26F" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="id_ruta" id="F66326B8-03CA-919B-6823-6E76F22D84E0">
+<createdBy>benja</createdBy>
+<createdTime>2026-08-24 02:03:08 UTC</createdTime>
+<ownerDesignName>Modelo_GestionTransporte</ownerDesignName>
+<engineerTo>
+<item key="0FA7FB0D-A261-7FA1-D859-2055443BF26F" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<use>0</use>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+</attributes>
+</Entity>

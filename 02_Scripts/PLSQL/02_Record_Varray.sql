@@ -60,8 +60,13 @@ SET PAGESIZE 60
 -- -por ejemplo contar asientos libres- un RECORD estaria de mas y bastaria una
 -- variable escalar.
 --------------------------------------------------------------------------------
+
+--Crear función para el calculo de la vigencia de la tarifa de un viaje, dado el id de la ruta, el id del tipo de asiento y la fecha de viaje. Esta función devuelve el precio vigente para esa combinación en esa fecha.
+
 DECLARE
+
     -- El tipo describe la unidad de informacion "pasaje por emitir".
+
     TYPE tr_pasaje IS RECORD (
         id_viaje         viaje.id_viaje%TYPE,
         id_bus           bus.id_bus%TYPE,
@@ -86,18 +91,11 @@ BEGIN
     r_pasaje.id_pasajero     := 3;
     r_pasaje.id_estado       := 1;    -- PEN, pendiente de pago
 
-    -- El precio no se inventa: se toma de la tarifa vigente para la ruta del
-    -- viaje y el tipo del asiento solicitado.
-    SELECT tf.id_tarifa, tf.precio
-    INTO   r_pasaje.id_tarifa, r_pasaje.precio_aplicado
-    FROM   tarifa  tf
-    JOIN   viaje   v ON v.id_ruta         = tf.id_ruta
-    JOIN   asiento a ON a.id_tipo_asiento = tf.id_tipo_asiento
-    WHERE  v.id_viaje    = r_pasaje.id_viaje
-    AND    a.id_bus      = r_pasaje.id_bus
-    AND    a.nro_asiento = r_pasaje.nro_asiento
-    AND    tf.vigencia_desde <= TRUNC(SYSDATE)
-    AND   (tf.vigencia_hasta IS NULL OR tf.vigencia_hasta >= TRUNC(SYSDATE));
+    --Reemplazar el SELECT por la llamada a la función que calcula la tarifa vigente para el viaje, tipo de asiento y fecha de viaje.
+
+    r_pasaje.id_tarifa := fn_tarifa_vigente(r_pasaje.id_viaje, r_pasaje.nro_asiento, TRUNC(SYSDATE));
+    r_pasaje.precio_aplicado := fn_precio_vigente(r_pasaje.id_tarifa);
+    
 
     DBMS_OUTPUT.PUT_LINE('--- 2.1 RECORD cargado como unidad ---');
     DBMS_OUTPUT.PUT_LINE('  Viaje '      || r_pasaje.id_viaje    ||
@@ -117,23 +115,26 @@ END;
 -- ofrece %TYPE, pero a nivel de fila completa: si la tabla gana o pierde una
 -- columna, el RECORD se ajusta solo.
 --
--- Cuando conviene cada uno: %ROWTYPE si se necesita la fila completa tal como
--- esta en la base; RECORD explicito -como el de 2.1- si la estructura combina
--- campos de varias tablas o incluye datos calculados que no existen como
--- columna.
+-- Este Record entrega la ruta, la distancia y la duracion estimada de un viaje. La duracion se expresa en horas con dos decimales, y se calcula a partir de la columna duracion_estimada_min que esta en minutos.
 --------------------------------------------------------------------------------
 DECLARE
     r_ruta   ruta%ROWTYPE;    -- toma la fila completa tal como esta en la tabla
     v_horas  NUMBER;
+    v_conductores  PLS_INTEGER;
 BEGIN
+
+    --Uso de función de calculo de la duracion estimada de la ruta, dado el id de la ruta.
     SELECT * INTO r_ruta FROM ruta WHERE id_ruta = 7;
     v_horas := ROUND(r_ruta.duracion_estimada_min / 60, 2);
+
+    -- Uso de función de calculo de la cantidad de conductores requeridos para la ruta, dado la duracion estimada en horas.
+    v_conductores := fn_conductores_requeridos(v_horas);
 
     DBMS_OUTPUT.PUT_LINE('--- 2.2 RECORD anclado con %ROWTYPE ---');
     DBMS_OUTPUT.PUT_LINE('  Ruta ' || r_ruta.id_ruta ||
                          ' | ' || r_ruta.distancia_km || ' km' ||
                          ' | ' || v_horas || ' h' ||
-                         ' | exige ' || CEIL(v_horas / 5) || ' conductor(es)');
+                         ' | exige ' || v_conductores || ' conductor(es)');
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
         DBMS_OUTPUT.PUT_LINE('  La ruta consultada no existe en el catalogo.');
@@ -160,25 +161,25 @@ END;
 -- proceso masivo- el VARRAY dejaria de ser apropiado y la tabla anidada o una
 -- coleccion asociativa serian la opcion correcta.
 --------------------------------------------------------------------------------
+
 DECLARE
-    -- El 6 no es arbitrario: es el maximo de asientos por transaccion que
-    -- define la politica comercial de la empresa.
+    -- Son 6 el numero de asientos maximo que un cliente puede comprar en una sola transaccion.
     TYPE tv_asientos IS VARRAY(6) OF asiento.nro_asiento%TYPE;
 
-    v_solicitados  tv_asientos := tv_asientos(3, 5, 8);   -- constructor
+    v_solicitados  tv_asientos%TYPE;  -- constructor
     v_libre        NUMBER;
     v_ocupados     PLS_INTEGER := 0;
 
-    c_viaje  CONSTANT viaje.id_viaje%TYPE := 6;
-    c_bus    CONSTANT bus.id_bus%TYPE     := 1;
+    v_viaje        viaje.id_viaje%TYPE;
+    v_bus          bus.id_bus%TYPE;
+
 BEGIN
-    DBMS_OUTPUT.PUT_LINE('--- 2.3 VARRAY de asientos solicitados ---');
-    DBMS_OUTPUT.PUT_LINE('  Limite del tipo: ' || v_solicitados.LIMIT ||
+    DBMS_OUTPUT.PUT_LINE('--- 2.3 VARRAY de asientos solicitados ---' || '  Limite del tipo: ' || v_solicitados.LIMIT ||
                          ' | solicitados: '    || v_solicitados.COUNT);
 
-    -- Se recorre la coleccion validando asiento por asiento. FIRST y LAST
-    -- delimitan el recorrido sin depender de un contador escrito a mano.
-    FOR i IN v_solicitados.FIRST .. v_solicitados.LAST LOOP
+    -- Se recorre la coleccion validando asiento por asiento. Avanzando por contador 
+
+    FOR i IN v_solicitados.COUNT loop --Recorre la coleccion validando asiento por asiento. Avanzando por contador de elementos en la variable
 
         -- Un asiento esta ocupado si tiene un pasaje en estado que ocupa
         -- asiento. Es la misma condicion que aplica el indice unico parcial.
@@ -186,8 +187,8 @@ BEGIN
         INTO   v_libre
         FROM   pasaje p
         JOIN   estado_pasaje ep ON ep.id_estado = p.id_estado
-        WHERE  p.id_viaje    = c_viaje
-        AND    p.id_bus      = c_bus
+        WHERE  p.id_viaje    = v_viaje
+        AND    p.id_bus      = v_bus
         AND    p.nro_asiento = v_solicitados(i)
         AND    ep.ocupa_asiento = 'S';
 
@@ -211,7 +212,7 @@ END;
 /
 
 --------------------------------------------------------------------------------
--- 2.4 RECORD y VARRAY trabajando juntos
+-- 2.4 RECORD y VARRAY trabajando juntos conjuga los dos enfoques anteriores
 -- Informe: seccion 5.3   |   Rubrica: IE1.1.1
 --
 -- Demuestra la division de responsabilidades entre ambas estructuras: el VARRAY
@@ -219,8 +220,18 @@ END;
 -- resulta de ellos. Es el esqueleto del procedimiento de venta que se
 -- desarrollara mas adelante.
 --------------------------------------------------------------------------------
-DECLARE
-    TYPE tr_pasaje IS RECORD (
+-- Este bloque simula la venta de varios asientos en un mismo viaje, y muestra el detalle de cada asiento y el total de la venta. Se asume que todos los asientos solicitados estan disponibles, y que el precio aplicado es el vigente para cada asiento en la fecha del viaje.
+-- Se puede invocar la funcion fn_tarifa_vigente para obtener el precio vigente de cada asiento, dado el id del viaje, el nro de asiento y la fecha del viaje.
+-- Posteriormente se aplicara un procedimiento para realizar la venta, que insertara un registro en la tabla pasaje por cada asiento vendido, con el precio aplicado y el estado correspondiente.
+
+CREATE OR REPLACE FUNCTION fn_proceso_venta (
+    p_id_tarifa  IN tarifa.id_tarifa%TYPE
+) RETURN pasaje.precio_aplicado%TYPE 
+IS
+v_precio  pasaje.precio_aplicado%TYPE;
+
+
+    TYPE tr_pasaje IS RECORD ( --record definido anteriormente, pero se repite aca para que el bloque sea autocontenido. Podria definirse en un package para que sea reutilizable.
         id_viaje         viaje.id_viaje%TYPE,
         id_bus           bus.id_bus%TYPE,
         nro_asiento      asiento.nro_asiento%TYPE,
@@ -230,40 +241,35 @@ DECLARE
         nombre_tipo      tipo_asiento.nombre%TYPE,
         precio_aplicado  pasaje.precio_aplicado%TYPE
     );
-    TYPE tv_asientos IS VARRAY(6) OF asiento.nro_asiento%TYPE;
+
+    TYPE tv_asientos IS VARRAY(6) OF asiento.nro_asiento%TYPE; -- VARRAY definido anteriormente, pero se repite aca para que el bloque sea autocontenido. Podria definirse en un package para que sea reutilizable.
 
     r_pasaje       tr_pasaje;
     v_solicitados  tv_asientos := tv_asientos(1, 2, 9);
     v_total        NUMBER := 0;
 
-    c_viaje  CONSTANT viaje.id_viaje%TYPE := 6;   -- Santiago - Concepcion
+    v_viaje  CONSTANT viaje.id_viaje%TYPE := 6;   -- Santiago - Concepcion
+    v_valor_pasaje  NUMBER;
+
 BEGIN
     DBMS_OUTPUT.PUT_LINE('--- 2.4 RECORD + VARRAY: simulacion de una venta ---');
 
-    r_pasaje.id_viaje := c_viaje;
-    SELECT id_bus INTO r_pasaje.id_bus FROM viaje WHERE id_viaje = c_viaje;
+    r_pasaje.id_viaje := v_viaje;
+    SELECT id_bus 
+    INTO r_pasaje.id_bus 
+    FROM viaje 
+    WHERE id_viaje = v_viaje;
 
     FOR i IN 1 .. v_solicitados.COUNT LOOP
         r_pasaje.nro_asiento := v_solicitados(i);
 
         -- Se completa el RECORD con el tipo del asiento y su tarifa vigente.
-        SELECT ta.nombre, tf.precio
-        INTO   r_pasaje.nombre_tipo, r_pasaje.precio_aplicado
-        FROM   asiento a
-        JOIN   tipo_asiento ta ON ta.id_tipo_asiento = a.id_tipo_asiento
-        JOIN   viaje v         ON v.id_viaje = r_pasaje.id_viaje
-        JOIN   tarifa tf ON tf.id_ruta         = v.id_ruta
-                        AND tf.id_tipo_asiento = a.id_tipo_asiento
-        WHERE  a.id_bus = r_pasaje.id_bus
-        AND    a.nro_asiento = r_pasaje.nro_asiento
-        AND    tf.vigencia_desde <= TRUNC(SYSDATE)
-        AND   (tf.vigencia_hasta IS NULL OR tf.vigencia_hasta >= TRUNC(SYSDATE));
-
-        v_total := v_total + r_pasaje.precio_aplicado;
+        v_valor_pasaje := fn_tarifa_vigente(r_pasaje.id_viaje, r_pasaje.nro_asiento, TRUNC(SYSDATE));
+        v_total := v_total + v_valor_pasaje;
 
         DBMS_OUTPUT.PUT_LINE('  Asiento ' || LPAD(r_pasaje.nro_asiento, 2) ||
                              ' | ' || RPAD(r_pasaje.nombre_tipo, 14) ||
-                             ' | $' || TO_CHAR(r_pasaje.precio_aplicado, 'FM999G999'));
+                             ' | $' || TO_CHAR(v_valor_pasaje, 'FM999G999'));
     END LOOP;
 
     DBMS_OUTPUT.PUT_LINE('  Total de la venta: $' || TO_CHAR(v_total, 'FM999G999'));
