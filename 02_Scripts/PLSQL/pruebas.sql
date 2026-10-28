@@ -1,292 +1,183 @@
-CREATE OR REPLACE PACKAGE pkg_programacion_viaje IS
+CREATE OR REPLACE PACKAGE pkg_programacion_conductor IS
 
-    -- Calcula la llegada a partir de la duración estimada de la ruta.
-    FUNCTION fn_llegada_prog (
-        p_id_ruta     IN ruta.id_ruta%TYPE,
-        p_salida_prog IN viaje.salida_prog%TYPE
-    ) RETURN viaje.llegada_prog%TYPE;
+    -- ¿Cuántos conductores exige un viaje de esta ruta? (RN-10)
+    FUNCTION fn_conductores_requeridos (
+        p_id_ruta IN ruta.id_ruta%TYPE
+    ) RETURN PLS_INTEGER;
 
-    -- Registro para representar el intervalo del viaje.
-    TYPE tr_bloque IS RECORD (
-        inicio_prog  viaje.salida_prog%TYPE,
-        llegada_prog viaje.llegada_prog%TYPE
+    -- ¿Está libre este conductor en el intervalo? (RN-03)
+    FUNCTION fn_conductor_disponible (
+        p_id_conductor IN conductor.id_conductor%TYPE,
+        p_salida       IN viaje.salida_prog%TYPE,
+        p_llegada      IN viaje.llegada_prog%TYPE,
+        p_excluir      IN viaje.id_viaje%TYPE DEFAULT NULL
+    ) RETURN BOOLEAN;
+
+    -- Asignación manual de UN conductor (rol TIT o REL)
+    PROCEDURE pr_asignar_conductor (
+        p_id_viaje     IN viaje.id_viaje%TYPE,
+        p_id_conductor IN conductor.id_conductor%TYPE,
+        p_rol          IN viaje_conductor.rol%TYPE DEFAULT 'TIT'
     );
 
-    -- Registra un viaje y devuelve su identificador.
-    PROCEDURE pr_registrar_viaje (
-        p_id_ruta      IN  viaje.id_ruta%TYPE,
-        p_id_bus       IN  viaje.id_bus%TYPE,
-        p_salida_prog  IN  viaje.salida_prog%TYPE,
-        p_llegada_prog IN  viaje.llegada_prog%TYPE DEFAULT NULL,
-        p_estado_viaje IN  viaje.estado_viaje%TYPE DEFAULT 'PRO',
-        p_id_viaje     OUT viaje.id_viaje%TYPE
-    );
-
-END pkg_programacion_viaje;
+END pkg_programacion_conductor;
 /
-CREATE OR REPLACE PACKAGE BODY pkg_programacion_viaje IS
 
-    ------------------------------------------------------------------
-    -- FUNCIÓN: calcular la llegada programada
-    ------------------------------------------------------------------
-    FUNCTION fn_llegada_prog (
-        p_id_ruta     IN ruta.id_ruta%TYPE,
-        p_salida_prog IN viaje.salida_prog%TYPE
-    ) RETURN viaje.llegada_prog%TYPE
+CREATE OR REPLACE PACKAGE BODY pkg_programacion_conductor IS
+    ----------------------------------------------------------------------------
+    -- 1. Cantidad de conductores requeridos (RN-10)
+    ----------------------------------------------------------------------------
+    FUNCTION fn_conductores_requeridos (
+        p_id_ruta IN ruta.id_ruta%TYPE
+    ) RETURN PLS_INTEGER
     IS
+        c_max_horas    CONSTANT NUMBER := 5;
         v_duracion_min ruta.duracion_estimada_min%TYPE;
     BEGIN
-        IF p_salida_prog IS NULL THEN
-            RAISE_APPLICATION_ERROR(
-                -20001,
-                'La fecha y hora de salida son obligatorias.'
-            );
-        END IF;
+        SELECT r.duracion_estimada_min INTO v_duracion_min
+        FROM   ruta r WHERE r.id_ruta = p_id_ruta;
 
-        SELECT duracion_estimada_min
-        INTO v_duracion_min
-        FROM ruta
-        WHERE id_ruta = p_id_ruta;
-
-        RETURN p_salida_prog
-               + NUMTODSINTERVAL(v_duracion_min, 'MINUTE');
-
+        RETURN CEIL(v_duracion_min / 60 / c_max_horas);
     EXCEPTION
         WHEN NO_DATA_FOUND THEN
-            RAISE_APPLICATION_ERROR(
-                -20002,
-                'La ruta ' || p_id_ruta || ' no existe.'
-            );
-    END fn_llegada_prog;
+            RAISE_APPLICATION_ERROR(-20030, 'Ruta ' || p_id_ruta || ' no existe.');
+    END fn_conductores_requeridos;
+    ----------------------------------------------------------------------------
+    -- 2. Disponibilidad: conductor libre en el intervalo
+    ----------------------------------------------------------------------------
+    FUNCTION fn_conductor_disponible (
+        p_id_conductor IN conductor.id_conductor%TYPE,
+        p_salida       IN viaje.salida_prog%TYPE,
+        p_llegada      IN viaje.llegada_prog%TYPE,
+        p_excluir      IN viaje.id_viaje%TYPE DEFAULT NULL
+    ) RETURN BOOLEAN
+    IS
+        v_ocupado NUMBER;
+    BEGIN
+        SELECT COUNT(*)
+        INTO   v_ocupado
+        FROM   viaje_conductor vc
+        JOIN   viaje v ON v.id_viaje = vc.id_viaje
+        WHERE  vc.id_conductor = p_id_conductor
+        AND    v.estado_viaje <> 'CAN'
+        AND    (p_excluir IS NULL OR v.id_viaje <> p_excluir)
+        AND    v.salida_prog  < p_llegada
+        AND    v.llegada_prog > p_salida;
 
-
-    ------------------------------------------------------------------
-    -- PROCEDIMIENTO: registrar un viaje
-    ------------------------------------------------------------------
-    PROCEDURE pr_registrar_viaje (
-        p_id_ruta      IN  viaje.id_ruta%TYPE,
-        p_id_bus       IN  viaje.id_bus%TYPE,
-        p_salida_prog  IN  viaje.salida_prog%TYPE,
-        p_llegada_prog IN  viaje.llegada_prog%TYPE DEFAULT NULL,
-        p_estado_viaje IN  viaje.estado_viaje%TYPE DEFAULT 'PRO',
-        p_id_viaje     OUT viaje.id_viaje%TYPE
+        RETURN v_ocupado = 0;
+    END fn_conductor_disponible;
+    ----------------------------------------------------------------------------
+    -- 3. Asignación MANUAL de un conductor
+    ----------------------------------------------------------------------------
+    PROCEDURE pr_asignar_conductor (
+        p_id_viaje     IN viaje.id_viaje%TYPE,
+        p_id_conductor IN conductor.id_conductor%TYPE,
+        p_rol          IN viaje_conductor.rol%TYPE DEFAULT 'TIT'
     )
     IS
-        v_llegada     viaje.llegada_prog%TYPE;
-        v_existe      NUMBER;
-        v_bus_ocupado NUMBER;
+        v_salida  viaje.salida_prog%TYPE;
+        v_llegada viaje.llegada_prog%TYPE;
+        v_existe  NUMBER;
     BEGIN
-        p_id_viaje := NULL;
+        -- Validar que el viaje exista
+        BEGIN
+            SELECT salida_prog, llegada_prog
+            INTO   v_salida, v_llegada
+            FROM   viaje WHERE id_viaje = p_id_viaje;
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+                RAISE_APPLICATION_ERROR(-20035,
+                    'Viaje ' || p_id_viaje || ' no existe.');
+        END;
 
-        --------------------------------------------------------------
-        -- 1. Validar los datos básicos
-        --------------------------------------------------------------
-        IF p_salida_prog IS NULL THEN
-            RAISE_APPLICATION_ERROR(
-                -20003,
-                'Debe indicar la fecha y hora de salida.'
-            );
-        END IF;
-
-        --------------------------------------------------------------
-        -- 2. Verificar que la ruta exista
-        --------------------------------------------------------------
-        SELECT COUNT(*)
-        INTO v_existe
-        FROM ruta
-        WHERE id_ruta = p_id_ruta;
-
+        -- Validar que el conductor exista
+        SELECT COUNT(*) INTO v_existe
+        FROM   conductor WHERE id_conductor = p_id_conductor;
         IF v_existe = 0 THEN
-            RAISE_APPLICATION_ERROR(
-                -20010,
-                'La ruta ' || p_id_ruta || ' no existe.'
-            );
+            RAISE_APPLICATION_ERROR(-20031,
+                'Conductor ' || p_id_conductor || ' no existe.');
         END IF;
 
-        --------------------------------------------------------------
-        -- 3. Verificar que el bus exista
-        --------------------------------------------------------------
-        SELECT COUNT(*)
-        INTO v_existe
-        FROM bus
-        WHERE id_bus = p_id_bus;
-
-        IF v_existe = 0 THEN
-            RAISE_APPLICATION_ERROR(
-                -20011,
-                'El bus ' || p_id_bus || ' no existe.'
-            );
+        -- Validar solapamiento (RN-03)
+        IF NOT fn_conductor_disponible(p_id_conductor, v_salida, v_llegada, p_id_viaje) THEN
+            RAISE_APPLICATION_ERROR(-20032,
+                'Conductor ' || p_id_conductor ||
+                ' ya tiene un viaje en ese intervalo.');
         END IF;
 
-        --------------------------------------------------------------
-        -- 4. Calcular o aceptar la llegada
-        --------------------------------------------------------------
-        IF p_llegada_prog IS NULL THEN
-            v_llegada :=
-                pkg_programacion_viaje.fn_llegada_prog(
-                    p_id_ruta,
-                    p_salida_prog
-                );
-        ELSE
-            v_llegada := p_llegada_prog;
-        END IF;
+        INSERT INTO viaje_conductor (id_viaje, id_conductor, rol)
+        VALUES (p_id_viaje, p_id_conductor, p_rol);
+    END pr_asignar_conductor;
 
-        --------------------------------------------------------------
-        -- 5. Validar el intervalo
-        --------------------------------------------------------------
-        IF v_llegada <= p_salida_prog THEN
-            RAISE_APPLICATION_ERROR(
-                -20013,
-                'La llegada debe ser posterior a la salida.'
-            );
-        END IF;
-
-        --------------------------------------------------------------
-        -- 6. Comprobar disponibilidad del bus
-        -- Los viajes cancelados no bloquean el intervalo.
-        --------------------------------------------------------------
-        SELECT COUNT(*)
-        INTO v_bus_ocupado
-        FROM viaje v
-        WHERE v.id_bus = p_id_bus
-          AND v.estado_viaje <> 'CAN'
-          AND v.salida_prog < v_llegada
-          AND v.llegada_prog > p_salida_prog;
-
-        IF v_bus_ocupado > 0 THEN
-            RAISE_APPLICATION_ERROR(
-                -20012,
-                'El bus ' || p_id_bus ||
-                ' ya tiene un viaje en ese intervalo.'
-            );
-        END IF;
-
-        --------------------------------------------------------------
-        -- 7. Generar el ID e insertar el viaje
-        --------------------------------------------------------------
-        SELECT seq_viaje.NEXTVAL
-        INTO p_id_viaje
-        FROM dual;
-
-        INSERT INTO viaje (
-            id_viaje,
-            id_ruta,
-            id_bus,
-            salida_prog,
-            llegada_prog,
-            estado_viaje
-        )
-        VALUES (
-            p_id_viaje,
-            p_id_ruta,
-            p_id_bus,
-            p_salida_prog,
-            v_llegada,
-            p_estado_viaje
-        );
-
-        -- Sin COMMIT: la transacción queda bajo control del llamante.
-
-    END pr_registrar_viaje;
-
-END pkg_programacion_viaje;
+END pkg_programacion_conductor;
 /
-SET SERVEROUTPUT ON;
---Listar
+-- Listar Disponibilidad Y Ver conductores requeridos
 DECLARE
-    r_bloque pkg_programacion_viaje.tr_bloque;
-
-    v_ruta   ruta.id_ruta%TYPE := 7;
-    v_inicio viaje.salida_prog%TYPE := TIMESTAMP '2026-11-10 08:00:00';
-    v_fin viaje.llegada_prog%TYPE;
-
-    CURSOR c_libres (
-        p_ini viaje.salida_prog%TYPE,
-        p_fin viaje.llegada_prog%TYPE
-    )IS
-        SELECT b.id_bus, b.patente, b.modelo
-        FROM bus b
-        WHERE NOT EXISTS (
-            SELECT 1
-            FROM viaje v
-            WHERE v.id_bus = b.id_bus
-              AND v.estado_viaje <> 'CAN'
-              AND v.salida_prog < p_fin
-              AND v.llegada_prog > p_ini
-        )
-        ORDER BY b.id_bus;
-
-    v_cantidad PLS_INTEGER := 0;
-
+    v_ruta       ruta.id_ruta%TYPE      := 7;
+    v_salida     viaje.salida_prog%TYPE := TIMESTAMP '2026-11-10 08:00:00';
+    v_llegada    viaje.llegada_prog%TYPE;
+    v_requeridos PLS_INTEGER;
 BEGIN
-    v_fin := pkg_programacion_viaje.fn_llegada_prog(
-        v_ruta,
-        v_inicio
-    );
-
-    r_bloque.inicio_prog  := v_inicio;
-    r_bloque.llegada_prog := v_fin;
+    v_llegada    := pkg_programacion_viaje.fn_llegada_prog(v_ruta, v_salida);
+    v_requeridos := pkg_programacion_conductor.fn_conductores_requeridos(v_ruta);
 
     DBMS_OUTPUT.PUT_LINE(
-        'Intervalo: ' ||
-        TO_CHAR(r_bloque.inicio_prog, 'YYYY-MM-DD HH24:MI') ||
-        ' - ' ||
-        TO_CHAR(r_bloque.llegada_prog, 'YYYY-MM-DD HH24:MI')
+        'Ventana: ' || TO_CHAR(v_salida, 'YYYY-MM-DD HH24:MI') ||
+        ' - '       || TO_CHAR(v_llegada, 'YYYY-MM-DD HH24:MI')
     );
+    DBMS_OUTPUT.PUT_LINE(
+        'Ruta ' || v_ruta || ' requiere ' || v_requeridos || ' conductor(es)'
+    );
+    DBMS_OUTPUT.PUT_LINE('Conductores disponibles:');
 
-    DBMS_OUTPUT.PUT_LINE('Buses disponibles:');
-
-    FOR r IN c_libres(
-        r_bloque.inicio_prog,
-        r_bloque.llegada_prog
+    FOR r IN (
+        SELECT c.id_conductor,
+               c.pnombre || ' ' || c.papellido AS nombre
+        FROM   conductor c
+        WHERE  NOT EXISTS (
+            SELECT 1 FROM viaje_conductor vc
+            JOIN   viaje v ON v.id_viaje = vc.id_viaje
+            WHERE  vc.id_conductor = c.id_conductor
+            AND    v.estado_viaje <> 'CAN'
+            AND    v.salida_prog  < v_llegada
+            AND    v.llegada_prog > v_salida
+        )
+        ORDER BY c.id_conductor
     ) LOOP
-        v_cantidad := v_cantidad + 1;
-
-        DBMS_OUTPUT.PUT_LINE(
-            'ID: ' || r.id_bus ||
-            ' | Patente: ' || r.patente ||
-            ' | Modelo: ' || r.modelo
-        );
+        DBMS_OUTPUT.PUT_LINE('  ID: ' || r.id_conductor || ' | ' || r.nombre);
     END LOOP;
-
-    IF v_cantidad = 0 THEN
-        DBMS_OUTPUT.PUT_LINE(
-            'No hay buses disponibles para este intervalo.'
-        );
-    END IF;
 END;
 /
---Ejecutar Programación
+--Asginación Manual
 DECLARE
-    v_id_bus   bus.id_bus%TYPE := &id_bus;
-    v_id_viaje viaje.id_viaje%TYPE;
-    v_ruta   ruta.id_ruta%TYPE := 7;
-    v_salida viaje.salida_prog%TYPE := TIMESTAMP '2026-11-10 08:00:00';
-
+    v_id_viaje viaje.id_viaje%TYPE         := &id_viaje;
+    v_id_tit   conductor.id_conductor%TYPE := &id_titular;
+    v_id_rel   conductor.id_conductor%TYPE := &id_relevo;  -- dejar vacío si es 1
+    v_requeridos PLS_INTEGER;
+    v_id_ruta  viaje.id_ruta%TYPE;
 BEGIN
+    SELECT id_ruta INTO v_id_ruta FROM viaje WHERE id_viaje = v_id_viaje;
+    v_requeridos := pkg_programacion_conductor.fn_conductores_requeridos(v_id_ruta);
 
+    -- Titular (siempre obligatorio)
+    pkg_programacion_conductor.pr_asignar_conductor(v_id_viaje, v_id_tit, 'TIT');
 
-    pkg_programacion_viaje.pr_registrar_viaje(
-        p_id_ruta     => v_ruta,
-        p_id_bus      => v_id_bus,
-        p_salida_prog => v_salida,
-        p_id_viaje    => v_id_viaje
-    );
+    -- Relevo solo si la ruta lo exige
+    IF v_requeridos > 1 AND v_id_rel IS NOT NULL THEN
+        pkg_programacion_conductor.pr_asignar_conductor(v_id_viaje, v_id_rel, 'REL');
+    END IF;
 
-    DBMS_OUTPUT.PUT_LINE(
-        'Viaje programado correctamente. ID: ' || v_id_viaje
-    );
+    IF v_requeridos > 1 AND v_id_rel IS NULL THEN
+        RAISE_APPLICATION_ERROR(-20036,
+            'La ruta requiere ' || v_requeridos || ' conductores; falta el relevo.');
+    END IF;
 
     COMMIT;
-
+    DBMS_OUTPUT.PUT_LINE('Conductores asignados manualmente.');
 EXCEPTION
     WHEN OTHERS THEN
         ROLLBACK;
-
-        DBMS_OUTPUT.PUT_LINE(
-            'No se pudo programar el viaje: ' || SQLERRM
-        );
-
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
         RAISE;
 END;
 /
